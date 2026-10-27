@@ -11,7 +11,7 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.const import CONF_NAME, EntityCategory
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .const import DeviceKind
@@ -60,13 +60,15 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[HeatitWiFiBinarySensorDescription, ...] = (
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: HeatitWiFiConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up binary sensor entities for a config entry."""
     data = entry.runtime_data
     name = entry.data[CONF_NAME]
     async_add_entities(
-        HeatitWiFiBinarySensor(data.coordinator, name, data.device_id, data.device_kind, description)
+        HeatitWiFiBinarySensor(
+            data.coordinator, name, data.device_id, data.device_kind, description
+        )
         for description in BINARY_SENSOR_DESCRIPTIONS
         if data.device_kind in description.device_kinds
     )

@@ -7,7 +7,7 @@ from homeassistant.components.select import SelectEntity, SelectEntityDescriptio
 from homeassistant.const import CONF_NAME, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
@@ -48,7 +48,10 @@ _DOUBLE_CLICK_OPTIONS = {
     3: "s1_and_s2",
 }
 _DIMMING_CURVE_OPTIONS: dict[bool | int, str] = {False: "linear", True: "logarithmic"}
-_DIMMING_MODE_OPTIONS: dict[bool | int, str] = {False: "trailing_edge", True: "leading_edge"}
+_DIMMING_MODE_OPTIONS: dict[bool | int, str] = {
+    False: "trailing_edge",
+    True: "leading_edge",
+}
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -63,7 +66,11 @@ class HeatitWiFiSelectDescription(SelectEntityDescription):
 
 
 def _describe(
-    key: str, device_kinds: set[DeviceKind], parameter: str, options: dict[bool | int, str], **kwargs
+    key: str,
+    device_kinds: set[DeviceKind],
+    parameter: str,
+    options: dict[bool | int, str],
+    **kwargs,
 ) -> HeatitWiFiSelectDescription:
     value_by_option = {option: value for value, option in options.items()}
     return HeatitWiFiSelectDescription(
@@ -92,7 +99,12 @@ SELECT_DESCRIPTIONS: tuple[HeatitWiFiSelectDescription, ...] = (
         _DISABLE_BUTTONS_OPTIONS,
         entity_registry_enabled_default=False,
     ),
-    _describe("switch_functionality", {DeviceKind.DIMMER}, "switchFunctionality", _SWITCH_FUNCTIONALITY_OPTIONS),
+    _describe(
+        "switch_functionality",
+        {DeviceKind.DIMMER},
+        "switchFunctionality",
+        _SWITCH_FUNCTIONALITY_OPTIONS,
+    ),
     _describe(
         "allow_multipress",
         {DeviceKind.DIMMER},
@@ -127,13 +139,20 @@ SELECT_DESCRIPTIONS: tuple[HeatitWiFiSelectDescription, ...] = (
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: HeatitWiFiConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up select entities for a config entry."""
     data = entry.runtime_data
     name = entry.data[CONF_NAME]
     async_add_entities(
-        HeatitWiFiSelect(data.coordinator, data.api, name, data.device_id, data.device_kind, description)
+        HeatitWiFiSelect(
+            data.coordinator,
+            data.api,
+            name,
+            data.device_id,
+            data.device_kind,
+            description,
+        )
         for description in SELECT_DESCRIPTIONS
         if data.device_kind in description.device_kinds
     )

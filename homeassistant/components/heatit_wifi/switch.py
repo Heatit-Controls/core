@@ -8,7 +8,7 @@ from homeassistant.components.switch import SwitchEntity, SwitchEntityDescriptio
 from homeassistant.const import CONF_NAME, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
@@ -118,13 +118,20 @@ SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: HeatitWiFiConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up switch entities for a config entry."""
     data = entry.runtime_data
     name = entry.data[CONF_NAME]
     async_add_entities(
-        HeatitWiFiSwitch(data.coordinator, data.api, name, data.device_id, data.device_kind, description)
+        HeatitWiFiSwitch(
+            data.coordinator,
+            data.api,
+            name,
+            data.device_id,
+            data.device_kind,
+            description,
+        )
         for description in SWITCH_DESCRIPTIONS
         if data.device_kind in description.device_kinds
     )

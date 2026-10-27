@@ -50,12 +50,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: HeatitWiFiConfigEntry) -
 
     device_id = await api.get_device_id(retries=1, timeout=10)
     if device_id == "unknown":
-        raise ConfigEntryNotReady(f"Could not connect to Heatit device at {host}")
+        raise ConfigEntryNotReady(
+            translation_domain=DOMAIN,
+            translation_key="cannot_connect",
+            translation_placeholders={"host": host},
+        )
 
     async def async_update_data() -> dict[str, Any]:
         data = await api.get_status()
         if not data:
-            raise UpdateFailed("Failed to fetch data from the Heatit WiFi device")
+            raise UpdateFailed(
+                translation_domain=DOMAIN, translation_key="update_failed"
+            )
         return data
 
     scan_interval = entry.options.get("scan_interval", DEFAULT_SCAN_INTERVAL)
@@ -77,12 +83,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: HeatitWiFiConfigEntry) -
         device_kind=device_kind,
     )
 
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS_BY_KIND[device_kind])
+    await hass.config_entries.async_forward_entry_setups(
+        entry, PLATFORMS_BY_KIND[device_kind]
+    )
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     return True
 
 
-async def _async_options_updated(hass: HomeAssistant, entry: HeatitWiFiConfigEntry) -> None:
+async def _async_options_updated(
+    hass: HomeAssistant, entry: HeatitWiFiConfigEntry
+) -> None:
     """Reload the entry when options (or the host) change."""
     await hass.config_entries.async_reload(entry.entry_id)
 

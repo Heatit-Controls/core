@@ -63,9 +63,7 @@ rules:
   reauthentication-flow:
     status: exempt
     comment: the local API has no authentication
-  test-coverage:
-    status: todo
-    comment: no tests written yet
+  test-coverage: done
   # Gold
   devices: done
   diagnostics: done

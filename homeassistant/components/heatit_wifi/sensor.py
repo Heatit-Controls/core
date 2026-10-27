@@ -18,7 +18,8 @@ from homeassistant.const import (
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.typing import StateType
 
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .const import NTC_FAULT_TEMPERATURE, DeviceKind
@@ -55,7 +56,7 @@ class HeatitWiFiSensorDescription(SensorEntityDescription):
     """Describes a Heatit WiFi sensor entity."""
 
     device_kinds: set[DeviceKind]
-    value_fn: Callable[[dict[str, Any]], Any]
+    value_fn: Callable[[dict[str, Any]], StateType]
     entity_registry_enabled_default: bool = True
 
 
@@ -125,13 +126,15 @@ SENSOR_DESCRIPTIONS: tuple[HeatitWiFiSensorDescription, ...] = (
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: HeatitWiFiConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up sensor entities for a config entry."""
     data = entry.runtime_data
     name = entry.data[CONF_NAME]
     async_add_entities(
-        HeatitWiFiSensor(data.coordinator, name, data.device_id, data.device_kind, description)
+        HeatitWiFiSensor(
+            data.coordinator, name, data.device_id, data.device_kind, description
+        )
         for description in SENSOR_DESCRIPTIONS
         if data.device_kind in description.device_kinds
     )
@@ -157,7 +160,7 @@ class HeatitWiFiSensor(HeatitWiFiEntity, SensorEntity):
 
     @property
     @override
-    def native_value(self) -> Any:
+    def native_value(self) -> StateType:
         """Return the sensor's current value."""
         data = self.coordinator.data
         return None if not data else self.entity_description.value_fn(data)

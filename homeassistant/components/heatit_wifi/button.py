@@ -7,7 +7,7 @@ from homeassistant.components.button import ButtonEntity, ButtonEntityDescriptio
 from homeassistant.const import CONF_NAME, EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
@@ -55,13 +55,20 @@ BUTTON_DESCRIPTIONS: tuple[HeatitWiFiButtonDescription, ...] = (
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: HeatitWiFiConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up button entities for a config entry."""
     data = entry.runtime_data
     name = entry.data[CONF_NAME]
     async_add_entities(
-        HeatitWiFiResetButton(data.coordinator, data.api, name, data.device_id, data.device_kind, description)
+        HeatitWiFiResetButton(
+            data.coordinator,
+            data.api,
+            name,
+            data.device_id,
+            data.device_kind,
+            description,
+        )
         for description in BUTTON_DESCRIPTIONS
     )
 
@@ -94,6 +101,9 @@ class HeatitWiFiResetButton(HeatitWiFiEntity, ButtonEntity):
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="reset_failed",
-                translation_placeholders={"reset_type": reset_type, "device": self._device_name},
+                translation_placeholders={
+                    "reset_type": reset_type,
+                    "device": self._device_name,
+                },
             )
         await self.coordinator.async_request_refresh()

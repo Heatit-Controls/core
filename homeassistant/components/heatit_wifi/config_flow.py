@@ -62,7 +62,9 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     @override
-    def async_get_options_flow(config_entry: HeatitWiFiConfigEntry) -> HeatitWiFiOptionsFlow:
+    def async_get_options_flow(
+        config_entry: HeatitWiFiConfigEntry,
+    ) -> HeatitWiFiOptionsFlow:
         """Create the options flow."""
         return HeatitWiFiOptionsFlow()
 
@@ -158,7 +160,9 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     @override
-    async def async_step_dhcp(self, discovery_info: DhcpServiceInfo) -> ConfigFlowResult:
+    async def async_step_dhcp(
+        self, discovery_info: DhcpServiceInfo
+    ) -> ConfigFlowResult:
         """Follow an already-configured device to its new DHCP lease.
 
         The "registered_devices" matcher only fires for a MAC already
@@ -193,7 +197,9 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
                 # which would orphan all its entities.
                 await self.async_set_unique_id(result.device_id)
                 self._abort_if_unique_id_mismatch(reason="different_device")
-                return self.async_update_reload_and_abort(entry, data_updates={CONF_HOST: host})
+                return self.async_update_reload_and_abort(
+                    entry, data_updates={CONF_HOST: host}
+                )
 
         return self.async_show_form(
             step_id="reconfigure",
@@ -222,7 +228,8 @@ class HeatitWiFiOptionsFlow(OptionsFlow):
                         "scan_interval", DEFAULT_SCAN_INTERVAL
                     ),
                 ): probatio.All(
-                    probatio.Coerce(int), probatio.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL)
+                    probatio.Coerce(int),
+                    probatio.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL),
                 ),
             }
         )

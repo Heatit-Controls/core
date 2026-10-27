@@ -6,7 +6,7 @@ from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEnti
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
@@ -20,12 +20,14 @@ PARALLEL_UPDATES = 1
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: HeatitWiFiConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up the WM Dimmer light entity from a config entry."""
     data = entry.runtime_data
     name = entry.data[CONF_NAME]
-    async_add_entities([HeatitWiFiDimmer(data.coordinator, data.api, name, data.device_id)])
+    async_add_entities(
+        [HeatitWiFiDimmer(data.coordinator, data.api, name, data.device_id)]
+    )
 
 
 class HeatitWiFiDimmer(HeatitWiFiEntity, LightEntity):

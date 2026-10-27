@@ -15,7 +15,7 @@ from homeassistant.components.climate import (
 from homeassistant.const import CONF_NAME, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import HeatitWiFiConfigEntry
 from .api import HeatitWiFiAPI
@@ -53,14 +53,16 @@ PANEL_SETPOINT_BY_MODE = {
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: HeatitWiFiConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up the climate entity for a thermostat or panel config entry."""
     data = entry.runtime_data
     name = entry.data[CONF_NAME]
 
     if data.device_kind is DeviceKind.PANEL:
-        async_add_entities([HeatitWiFiPanel(data.coordinator, data.api, name, data.device_id)])
+        async_add_entities(
+            [HeatitWiFiPanel(data.coordinator, data.api, name, data.device_id)]
+        )
     else:
         async_add_entities(
             [HeatitWiFiThermostat(data.coordinator, data.api, name, data.device_id)]
@@ -131,7 +133,11 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
         """Return setpoint corresponding to the active operating mode."""
         params = self._parameters()
         operating_mode = params.get("operatingMode")
-        key = THERMOSTAT_SETPOINT_BY_MODE.get(operating_mode) if operating_mode is not None else None
+        key = (
+            THERMOSTAT_SETPOINT_BY_MODE.get(operating_mode)
+            if operating_mode is not None
+            else None
+        )
         if key is None:
             return None
         return params.get(key)
@@ -166,7 +172,8 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
         """Set a new target temperature."""
         if self.hvac_mode == HVACMode.OFF:
             _LOGGER.warning(
-                "Cannot set target temperature for %s while device is OFF", self._device_name
+                "Cannot set target temperature for %s while device is OFF",
+                self._device_name,
             )
             return
 
@@ -176,9 +183,15 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
             return
 
         operating_mode = self._parameters().get("operatingMode")
-        param = THERMOSTAT_SETPOINT_BY_MODE.get(operating_mode) if operating_mode is not None else None
+        param = (
+            THERMOSTAT_SETPOINT_BY_MODE.get(operating_mode)
+            if operating_mode is not None
+            else None
+        )
         if param is None:
-            _LOGGER.error("Cannot set temperature: unsupported operating mode %s", operating_mode)
+            _LOGGER.error(
+                "Cannot set temperature: unsupported operating mode %s", operating_mode
+            )
             return
 
         if not await self._api.set_parameters(**{param: temperature}):
@@ -204,7 +217,10 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="unsupported_value",
-                translation_placeholders={"parameter": "preset_mode", "value": str(preset_mode)},
+                translation_placeholders={
+                    "parameter": "preset_mode",
+                    "value": str(preset_mode),
+                },
             )
         if not await self._api.set_parameters(operatingMode=operating_mode):
             raise HomeAssistantError(
@@ -226,7 +242,10 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="unsupported_value",
-                translation_placeholders={"parameter": "hvac_mode", "value": str(hvac_mode)},
+                translation_placeholders={
+                    "parameter": "hvac_mode",
+                    "value": str(hvac_mode),
+                },
             )
         if not await self._api.set_parameters(operatingMode=operating_mode):
             raise HomeAssistantError(
@@ -353,7 +372,11 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
         """Return current HVAC mode."""
         if not self.coordinator.data:
             return HVACMode.OFF
-        return HVACMode.OFF if self._parameters().get("panelMode") == PANEL_MODE_OFF else HVACMode.HEAT
+        return (
+            HVACMode.OFF
+            if self._parameters().get("panelMode") == PANEL_MODE_OFF
+            else HVACMode.HEAT
+        )
 
     @property
     @override
@@ -379,7 +402,8 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
         """Set a new target temperature."""
         if self.hvac_mode == HVACMode.OFF:
             _LOGGER.warning(
-                "Cannot set target temperature for %s while device is OFF", self._device_name
+                "Cannot set target temperature for %s while device is OFF",
+                self._device_name,
             )
             return
 
@@ -389,7 +413,9 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
             return
 
         panel_mode = self._parameters().get("panelMode")
-        param = PANEL_SETPOINT_BY_MODE.get(panel_mode) if panel_mode is not None else None
+        param = (
+            PANEL_SETPOINT_BY_MODE.get(panel_mode) if panel_mode is not None else None
+        )
         if param is None:
             return
         if not await self._api.set_parameters(**{param: temperature}):
@@ -415,7 +441,10 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="unsupported_value",
-                translation_placeholders={"parameter": "preset_mode", "value": str(preset_mode)},
+                translation_placeholders={
+                    "parameter": "preset_mode",
+                    "value": str(preset_mode),
+                },
             )
         if not await self._api.set_parameters(panelMode=panel_mode):
             raise HomeAssistantError(

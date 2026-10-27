@@ -13,7 +13,7 @@ from homeassistant.components.number import (
 from homeassistant.const import CONF_NAME, EntityCategory, UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
@@ -75,10 +75,16 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         entity_registry_enabled_default=False,
     ),
     _temperature_limit(
-        "floor_min_temperature", {DeviceKind.THERMOSTAT}, "floorMinimumTemperatureLimit", enabled=True
+        "floor_min_temperature",
+        {DeviceKind.THERMOSTAT},
+        "floorMinimumTemperatureLimit",
+        enabled=True,
     ),
     _temperature_limit(
-        "floor_max_temperature", {DeviceKind.THERMOSTAT}, "floorMaximumTemperatureLimit", enabled=True
+        "floor_max_temperature",
+        {DeviceKind.THERMOSTAT},
+        "floorMaximumTemperatureLimit",
+        enabled=True,
     ),
     HeatitWiFiNumberDescription(
         key="automatic_turn_off",
@@ -102,8 +108,18 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         native_step=0.5,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
     ),
-    _temperature_limit("minimum_temperature_limit", {DeviceKind.PANEL}, "minimumTemperatureLimit", enabled=True),
-    _temperature_limit("maximum_temperature_limit", {DeviceKind.PANEL}, "maximumTemperatureLimit", enabled=True),
+    _temperature_limit(
+        "minimum_temperature_limit",
+        {DeviceKind.PANEL},
+        "minimumTemperatureLimit",
+        enabled=True,
+    ),
+    _temperature_limit(
+        "maximum_temperature_limit",
+        {DeviceKind.PANEL},
+        "maximumTemperatureLimit",
+        enabled=True,
+    ),
     HeatitWiFiNumberDescription(
         key="sensor_calibration",
         translation_key="sensor_calibration",
@@ -164,13 +180,20 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: HeatitWiFiConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up number entities for a config entry."""
     data = entry.runtime_data
     name = entry.data[CONF_NAME]
     async_add_entities(
-        HeatitWiFiNumber(data.coordinator, data.api, name, data.device_id, data.device_kind, description)
+        HeatitWiFiNumber(
+            data.coordinator,
+            data.api,
+            name,
+            data.device_id,
+            data.device_kind,
+            description,
+        )
         for description in NUMBER_DESCRIPTIONS
         if data.device_kind in description.device_kinds
     )
@@ -200,7 +223,9 @@ class HeatitWiFiNumber(HeatitWiFiEntity, NumberEntity):
     @override
     def native_value(self) -> float | None:
         """Return the parameter's current value."""
-        return _parameter_field(self.entity_description.parameter)(self.coordinator.data or {})
+        return _parameter_field(self.entity_description.parameter)(
+            self.coordinator.data or {}
+        )
 
     @override
     async def async_set_native_value(self, value: float) -> None:
