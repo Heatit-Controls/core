@@ -1,0 +1,171 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Enter the name and local IP address (or hostname) of your Heatit WiFi thermostat, panel or dimmer.",
+        "data": {
+          "name": "Name",
+          "host": "Host"
+        },
+        "data_description": {
+          "name": "A name to identify this device in Home Assistant.",
+          "host": "The device's IP address or hostname on your local network, e.g. 192.168.1.50."
+        }
+      },
+      "zeroconf_confirm": {
+        "description": "Do you want to add the Heatit WiFi device discovered at {host}?",
+        "data": {
+          "name": "Name"
+        },
+        "data_description": {
+          "name": "[%key:component::heatit_wifi::config::step::user::data_description::name%]"
+        }
+      },
+      "reconfigure": {
+        "description": "Update the address for this device, for example after a DHCP lease change.",
+        "data": {
+          "host": "Host"
+        },
+        "data_description": {
+          "host": "[%key:component::heatit_wifi::config::step::user::data_description::host%]"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to a Heatit WiFi device at that address."
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "cannot_connect": "Could not connect to a Heatit WiFi device at that address.",
+      "reconfigure_successful": "[%key:common::config_flow::abort::reconfigure_successful%]",
+      "different_device": "The address you entered belongs to a different device than the one configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "description": "Change how often Home Assistant polls the device.",
+        "data": {
+          "scan_interval": "Polling interval"
+        },
+        "data_description": {
+          "scan_interval": "How often, in seconds, to fetch the device's status."
+        }
+      }
+    }
+  },
+  "entity": {
+    "number": {
+      "hysteresis": { "name": "Hysteresis" },
+      "floor_min_temperature": { "name": "Floor minimum temperature limit" },
+      "floor_max_temperature": { "name": "Floor maximum temperature limit" },
+      "automatic_turn_off": { "name": "Automatic turn off" },
+      "eco_setpoint": { "name": "Eco setpoint" },
+      "minimum_temperature_limit": { "name": "Minimum temperature limit" },
+      "maximum_temperature_limit": { "name": "Maximum temperature limit" },
+      "sensor_calibration": { "name": "Sensor calibration" },
+      "minimum_dim_level": { "name": "Minimum dim level" },
+      "maximum_dim_level": { "name": "Maximum dim level" },
+      "dimming_duration": { "name": "Dimming duration" }
+    },
+    "switch": {
+      "child_lock": { "name": "Child lock" },
+      "open_window_detection": { "name": "Open window detection" },
+      "display_measured_temperature": { "name": "Display measured temperature" },
+      "external_sensor": { "name": "External sensor" },
+      "on_off_functionality": { "name": "On/off only" },
+      "always_on": { "name": "Always on" },
+      "autocalibration": { "name": "Autocalibration on repower" }
+    },
+    "select": {
+      "sensor_mode": {
+        "name": "Sensor mode",
+        "state": {
+          "floor": "Floor sensor",
+          "internal": "Internal sensor",
+          "internal_with_floor_limit": "Internal sensor with floor limitation",
+          "external": "External sensor",
+          "external_with_floor_limit": "External sensor with floor limitation",
+          "power_regulator": "Power regulator"
+        }
+      },
+      "buttons": {
+        "name": "Buttons",
+        "state": {
+          "enabled": "Enabled",
+          "disabled": "Disabled",
+          "menu_locked": "Menu locked"
+        }
+      },
+      "switch_functionality": {
+        "name": "Switch functionality",
+        "state": {
+          "scene_controller": "Scene controller",
+          "s1_s2_load_and_scene": "S1 and S2 control the load and scene controller",
+          "s1_load": "S1 controls the load",
+          "s2_load": "S2 controls the load"
+        }
+      },
+      "allow_multipress": {
+        "name": "Multipress scenes",
+        "state": {
+          "disabled": "Disabled",
+          "s1_scene": "S1 multipress is a scene controller",
+          "s2_scene": "S2 multipress is a scene controller",
+          "s1_and_s2_scene": "S1 and S2 multipress are scene controllers"
+        }
+      },
+      "double_click_for_100": {
+        "name": "Double click for 100%",
+        "state": {
+          "disabled": "Disabled",
+          "s1": "Enabled for S1",
+          "s2": "Enabled for S2",
+          "s1_and_s2": "Enabled for S1 and S2"
+        }
+      },
+      "dimming_curve": {
+        "name": "Dimming curve",
+        "state": {
+          "linear": "Linear",
+          "logarithmic": "Logarithmic"
+        }
+      },
+      "dimming_mode": {
+        "name": "Dimming mode",
+        "state": {
+          "trailing_edge": "Trailing edge",
+          "leading_edge": "Leading edge"
+        }
+      }
+    },
+    "sensor": {
+      "power": { "name": "Power" },
+      "energy": { "name": "Energy" },
+      "signal_strength": { "name": "Signal strength" },
+      "internal_temperature": { "name": "Internal temperature" },
+      "floor_temperature": { "name": "Floor temperature" },
+      "external_temperature": { "name": "External temperature" }
+    },
+    "binary_sensor": {
+      "open_window_detected": { "name": "Open window detected" },
+      "open_window_detection_enabled": { "name": "Open window detection enabled" }
+    },
+    "button": {
+      "reset_energy_meter": { "name": "Reset energy meter" },
+      "reset_settings": { "name": "Reset settings to defaults" },
+      "factory_reset": { "name": "Factory reset" }
+    }
+  },
+  "exceptions": {
+    "set_parameter_failed": {
+      "message": "Failed to set {parameter} to {value} on {device}."
+    },
+    "unsupported_value": {
+      "message": "Unsupported {parameter} value: {value}."
+    },
+    "reset_failed": {
+      "message": "Failed to run the {reset_type} reset on {device}."
+    }
+  }
+}

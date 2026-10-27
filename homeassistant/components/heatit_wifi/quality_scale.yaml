@@ -1,0 +1,121 @@
+# Honest self-assessment. "todo" items are real gaps, not placeholders —
+# see the PR description for what's pending before each tier can be
+# claimed for real (tests, home-assistant.io docs, brands, hardware
+# verification of Panel V2 / WM Dimmer).
+rules:
+  # Bronze
+  action-setup:
+    status: exempt
+    comment: no custom service actions registered
+  appropriate-polling: done
+  brands:
+    status: todo
+    comment: needs a home-assistant/brands PR (icon + logo)
+  common-modules: done
+  config-flow-test-coverage:
+    status: done
+    comment: >-
+      tests/components/heatit_wifi/test_config_flow.py covers user
+      (success/cannot_connect), zeroconf (discover/confirm/update-in-place),
+      and reconfigure (success/different_device) for all three device kinds
+  config-flow: done
+  dependency-transparency:
+    status: exempt
+    comment: no external requirement; the API client is a module inside the integration
+  docs-actions:
+    status: exempt
+    comment: no custom actions
+  docs-conditions:
+    status: exempt
+    comment: no conditions
+  docs-high-level-description:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-installation-instructions:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-removal-instructions:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-triggers:
+    status: exempt
+    comment: no triggers
+  entity-event-setup: done
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup: done
+  unique-config-entry: done
+  # Silver
+  action-exceptions: done
+  config-entry-unloading: done
+  docs-configuration-parameters:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-installation-parameters:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable: done
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: the local API has no authentication
+  test-coverage:
+    status: todo
+    comment: no tests written yet
+  # Gold
+  devices: done
+  diagnostics: done
+  discovery:
+    status: done
+    comment: >-
+      zeroconf for WiFi7, WiFi6 V2, Panel V2 and the WM Dimmer
+      (_tf._tcp.local.); WiFi6 V1 and Panel V1 don't advertise and stay
+      manual-only, matched by design, not a gap
+  discovery-update-info: done
+  docs-data-update:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-examples:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-known-limitations:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-supported-devices:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-supported-functions:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-troubleshooting:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-use-cases:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  dynamic-devices:
+    status: exempt
+    comment: one config entry is exactly one physical device
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default: done
+  entity-translations: done
+  exception-translations: done
+  icon-translations: done
+  reconfiguration-flow: done
+  repair-issues:
+    status: exempt
+    comment: no repair scenarios in v1
+  stale-devices:
+    status: exempt
+    comment: one config entry is exactly one physical device
+  # Platinum
+  async-dependency:
+    status: exempt
+    comment: no external dependency library; the client is inherently async (aiohttp)
+  inject-websession: done
+  strict-typing: done
