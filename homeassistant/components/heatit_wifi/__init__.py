@@ -1,7 +1,6 @@
 """The Heatit WiFi integration."""
 
 from dataclasses import dataclass
-from datetime import timedelta
 import logging
 from typing import Any
 
@@ -15,9 +14,9 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .api import HeatitWiFiAPI
 from .const import (
     CONF_DEVICE_KIND,
-    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     PLATFORMS_BY_KIND,
+    SCAN_INTERVAL,
     DeviceKind,
 )
 
@@ -64,14 +63,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: HeatitWiFiConfigEntry) -
             )
         return data
 
-    scan_interval = entry.options.get("scan_interval", DEFAULT_SCAN_INTERVAL)
     coordinator: HeatitWiFiCoordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
         config_entry=entry,
         name=DOMAIN,
         update_method=async_update_data,
-        update_interval=timedelta(seconds=scan_interval),
+        update_interval=SCAN_INTERVAL,
     )
 
     await coordinator.async_config_entry_first_refresh()
@@ -86,15 +84,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: HeatitWiFiConfigEntry) -
     await hass.config_entries.async_forward_entry_setups(
         entry, PLATFORMS_BY_KIND[device_kind]
     )
-    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     return True
-
-
-async def _async_options_updated(
-    hass: HomeAssistant, entry: HeatitWiFiConfigEntry
-) -> None:
-    """Reload the entry when options (or the host) change."""
-    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: HeatitWiFiConfigEntry) -> bool:

@@ -10,7 +10,7 @@ from homeassistant.components.number import (
     NumberEntityDescription,
     NumberMode,
 )
-from homeassistant.const import CONF_NAME, EntityCategory, UnitOfTemperature, UnitOfTime
+from homeassistant.const import EntityCategory, UnitOfTemperature, UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -184,7 +184,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up number entities for a config entry."""
     data = entry.runtime_data
-    name = entry.data[CONF_NAME]
+    name = entry.title
     async_add_entities(
         HeatitWiFiNumber(
             data.coordinator,

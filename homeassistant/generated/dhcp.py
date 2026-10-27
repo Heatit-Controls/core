@@ -473,6 +473,10 @@ DHCP: Final[list[dict[str, str | bool]]] = [
         "hostname": "harborc-*",
     },
     {
+        "domain": "heatit_wifi",
+        "registered_devices": True,
+    },
+    {
         "domain": "home_connect",
         "hostname": "balay-*",
         "macaddress": "C8D778*",

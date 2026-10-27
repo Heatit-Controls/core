@@ -6,7 +6,6 @@
       'data': dict({
         'device_kind': 'dimmer',
         'host': '**REDACTED**',
-        'name': 'Dimmer',
       }),
       'options': dict({
       }),
@@ -49,7 +48,6 @@
       'data': dict({
         'device_kind': 'panel',
         'host': '**REDACTED**',
-        'name': 'Panel',
       }),
       'options': dict({
       }),
@@ -95,7 +93,6 @@
       'data': dict({
         'device_kind': 'thermostat',
         'host': '**REDACTED**',
-        'name': 'Thermostat',
       }),
       'options': dict({
       }),

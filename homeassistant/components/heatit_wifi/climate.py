@@ -12,7 +12,7 @@ from homeassistant.components.climate import (
     HVACAction,
     HVACMode,
 )
-from homeassistant.const import CONF_NAME, UnitOfTemperature
+from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -57,7 +57,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the climate entity for a thermostat or panel config entry."""
     data = entry.runtime_data
-    name = entry.data[CONF_NAME]
+    name = entry.title
 
     if data.device_kind is DeviceKind.PANEL:
         async_add_entities(
@@ -340,13 +340,13 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
     @override
     def min_temp(self) -> float:
         """Return the panel's own configured minimum, not a hardcoded one."""
-        return self._parameters().get("minimumTemperatureLimit", 5.0)
+        return float(self._parameters().get("minimumTemperatureLimit", 5.0))
 
     @property
     @override
     def max_temp(self) -> float:
         """Return the panel's own configured maximum, not a hardcoded one."""
-        return self._parameters().get("maximumTemperatureLimit", 40.0)
+        return float(self._parameters().get("maximumTemperatureLimit", 40.0))
 
     @property
     @override

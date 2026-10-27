@@ -3,7 +3,6 @@
 from typing import Any, override
 
 from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEntity
-from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -24,7 +23,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the WM Dimmer light entity from a config entry."""
     data = entry.runtime_data
-    name = entry.data[CONF_NAME]
+    name = entry.title
     async_add_entities(
         [HeatitWiFiDimmer(data.coordinator, data.api, name, data.device_id)]
     )

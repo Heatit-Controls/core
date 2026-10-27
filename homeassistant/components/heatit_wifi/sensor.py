@@ -11,7 +11,6 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import (
-    CONF_NAME,
     EntityCategory,
     UnitOfEnergy,
     UnitOfPower,
@@ -130,7 +129,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up sensor entities for a config entry."""
     data = entry.runtime_data
-    name = entry.data[CONF_NAME]
+    name = entry.title
     async_add_entities(
         HeatitWiFiSensor(
             data.coordinator, name, data.device_id, data.device_kind, description

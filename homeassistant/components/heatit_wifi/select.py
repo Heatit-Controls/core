@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import override
 
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
-from homeassistant.const import CONF_NAME, EntityCategory
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -70,7 +70,8 @@ def _describe(
     device_kinds: set[DeviceKind],
     parameter: str,
     options: dict[bool | int, str],
-    **kwargs,
+    *,
+    entity_registry_enabled_default: bool = True,
 ) -> HeatitWiFiSelectDescription:
     value_by_option = {option: value for value, option in options.items()}
     return HeatitWiFiSelectDescription(
@@ -80,7 +81,7 @@ def _describe(
         parameter=parameter,
         options=list(value_by_option),
         value_by_option=value_by_option,
-        **kwargs,
+        entity_registry_enabled_default=entity_registry_enabled_default,
     )
 
 
@@ -143,7 +144,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up select entities for a config entry."""
     data = entry.runtime_data
-    name = entry.data[CONF_NAME]
+    name = entry.title
     async_add_entities(
         HeatitWiFiSelect(
             data.coordinator,

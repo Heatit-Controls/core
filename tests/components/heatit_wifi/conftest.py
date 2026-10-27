@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from homeassistant.components.heatit_wifi.const import DOMAIN, DeviceKind
-from homeassistant.const import CONF_HOST, CONF_NAME, Platform
+from homeassistant.const import CONF_HOST, Platform
 from homeassistant.core import HomeAssistant
 
 from tests.common import MockConfigEntry
@@ -127,8 +127,8 @@ def thermostat_config_entry() -> MockConfigEntry:
     return MockConfigEntry(
         domain=DOMAIN,
         unique_id=THERMOSTAT_STATUS["id"],
+        title="Thermostat",
         data={
-            CONF_NAME: "Thermostat",
             CONF_HOST: THERMOSTAT_HOST,
             "device_kind": "thermostat",
         },
@@ -141,7 +141,8 @@ def panel_config_entry() -> MockConfigEntry:
     return MockConfigEntry(
         domain=DOMAIN,
         unique_id=PANEL_STATUS["id"],
-        data={CONF_NAME: "Panel", CONF_HOST: PANEL_HOST, "device_kind": "panel"},
+        title="Panel",
+        data={CONF_HOST: PANEL_HOST, "device_kind": "panel"},
     )
 
 
@@ -151,7 +152,8 @@ def dimmer_config_entry() -> MockConfigEntry:
     return MockConfigEntry(
         domain=DOMAIN,
         unique_id=DIMMER_STATUS["id"],
-        data={CONF_NAME: "Dimmer", CONF_HOST: DIMMER_HOST, "device_kind": "dimmer"},
+        title="Dimmer",
+        data={CONF_HOST: DIMMER_HOST, "device_kind": "dimmer"},
     )
 
 
@@ -188,8 +190,8 @@ def mock_config_entry(device_kind: str) -> MockConfigEntry:
     return MockConfigEntry(
         domain=DOMAIN,
         unique_id=STATUS_BY_KIND[device_kind]["id"],
+        title=NAME_BY_KIND[device_kind],
         data={
-            CONF_NAME: NAME_BY_KIND[device_kind],
             CONF_HOST: HOST_BY_KIND[device_kind],
             "device_kind": device_kind,
         },

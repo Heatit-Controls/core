@@ -76,7 +76,7 @@ class HeatitWiFiAPI:
                 if attempt < retries:
                     wait_time = (attempt + 1) * 2
                     _LOGGER.debug(
-                        "%s %s failed (attempt %d/%d): %s. Retrying in %ds...",
+                        "%s %s failed (attempt %d/%d): %s, retrying in %ds",
                         method,
                         url,
                         attempt + 1,
@@ -103,15 +103,16 @@ class HeatitWiFiAPI:
         if not text or not text.startswith("{") or not text.endswith("}"):
             return {}
         try:
-            return json.loads(text)
+            data = json.loads(text)
         except json.JSONDecodeError as err:
             _LOGGER.error("JSON parsing failed: %s", err)
             return {}
+        return data if isinstance(data, dict) else {}
 
     async def get_device_id(self, retries: int = 0, timeout: float = 8) -> str:
         """Return the device's ID, or "unknown" on failure."""
         data = await self._request("GET", API_STATUS, timeout=timeout, retries=retries)
-        return data.get("id", "unknown")
+        return str(data.get("id", "unknown"))
 
     async def get_status(self, retries: int = 1, timeout: float = 5) -> dict[str, Any]:
         """Return the full status payload from the device."""
@@ -143,7 +144,7 @@ class HeatitWiFiAPI:
             )
         if str(response.get("status", "")).lower() == "success":
             return response
-        _LOGGER.error("set_parameters(%s) failed: %s", parameters, response)
+        _LOGGER.debug("set_parameters(%s) failed: %s", parameters, response)
         return {}
 
     async def reset_device(self, reset_type: str = "kwh") -> dict[str, Any]:
@@ -157,7 +158,7 @@ class HeatitWiFiAPI:
         endpoint = f"{API_RESET}/{reset_type}?reset=reset"
         response = await self._request("DELETE", endpoint, timeout=10, retries=1)
         if str(response.get("status", "")).lower() == "success":
-            _LOGGER.info("reset_device(%s) succeeded", reset_type)
+            _LOGGER.debug("reset_device(%s) succeeded", reset_type)
             return response
-        _LOGGER.error("reset_device(%s) failed: %s", reset_type, response)
+        _LOGGER.debug("reset_device(%s) failed: %s", reset_type, response)
         return {}

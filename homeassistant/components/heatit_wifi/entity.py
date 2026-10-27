@@ -6,15 +6,7 @@ from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, Device
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HeatitWiFiCoordinator
-from .const import DOMAIN
-
-# WiFi6 thermostats predate the "model" field; fall back to a plain label
-# per product kind instead of leaving the device page blank.
-_FALLBACK_MODEL_BY_KIND = {
-    "thermostat": "WiFi6 Thermostat",
-    "panel": "WiFi Panel",
-    "dimmer": "WM Dimmer",
-}
+from .const import DOMAIN, FALLBACK_MODEL_BY_KIND
 
 
 class HeatitWiFiEntity(CoordinatorEntity[HeatitWiFiCoordinator]):
@@ -41,7 +33,7 @@ class HeatitWiFiEntity(CoordinatorEntity[HeatitWiFiCoordinator]):
         """Return device registry info derived from the latest status."""
         data = self.coordinator.data or {}
         network = data.get("network") or data.get("Network") or {}
-        model = data.get("model") or _FALLBACK_MODEL_BY_KIND[self._device_kind]
+        model = data.get("model") or FALLBACK_MODEL_BY_KIND[self._device_kind]
 
         info = DeviceInfo(
             identifiers={(DOMAIN, self._device_id)},

@@ -21,23 +21,15 @@
       },
       "user": {
         "data": {
-          "host": "Host",
-          "name": "Name"
+          "host": "Host"
         },
         "data_description": {
-          "host": "The device's IP address or hostname on your local network, e.g. 192.168.1.50.",
-          "name": "A name to identify this device in Home Assistant."
+          "host": "The device's IP address or hostname on your local network, e.g. 192.168.1.50."
         },
-        "description": "Enter the name and local IP address (or hostname) of your Heatit WiFi thermostat, panel or dimmer."
+        "description": "Enter the local IP address (or hostname) of your Heatit WiFi thermostat, panel or dimmer."
       },
       "zeroconf_confirm": {
-        "data": {
-          "name": "Name"
-        },
-        "data_description": {
-          "name": "[%key:component::heatit_wifi::config::step::user::data_description::name%]"
-        },
-        "description": "Do you want to add the Heatit WiFi device discovered at {host}?"
+        "description": "Do you want to add {name}, discovered at {host}?"
       }
     }
   },
@@ -217,19 +209,6 @@
     },
     "update_failed": {
       "message": "Failed to fetch data from the Heatit WiFi device."
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "data": {
-          "scan_interval": "Polling interval"
-        },
-        "data_description": {
-          "scan_interval": "How often, in seconds, to fetch the device's status."
-        },
-        "description": "Change how often Home Assistant polls the device."
-      }
     }
   }
 }

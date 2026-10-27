@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import override
 
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
-from homeassistant.const import CONF_NAME, EntityCategory
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -59,7 +59,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up button entities for a config entry."""
     data = entry.runtime_data
-    name = entry.data[CONF_NAME]
+    name = entry.title
     async_add_entities(
         HeatitWiFiResetButton(
             data.coordinator,

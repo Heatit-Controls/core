@@ -754,6 +754,8 @@ CLAUDE.md @home-assistant/core
 /tests/components/hdfury/ @glenndehaan
 /homeassistant/components/hdmi_cec/ @inytar
 /tests/components/hdmi_cec/ @inytar
+/homeassistant/components/heatit_wifi/ @jonatf
+/tests/components/heatit_wifi/ @jonatf
 /homeassistant/components/heatmiser/ @andylockran
 /homeassistant/components/hegel/ @boazca
 /tests/components/hegel/ @boazca

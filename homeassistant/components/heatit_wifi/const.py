@@ -1,5 +1,6 @@
 """Constants for the Heatit WiFi integration."""
 
+from datetime import timedelta
 from enum import StrEnum
 from typing import Final
 
@@ -11,9 +12,7 @@ CONF_DEVICE_KIND: Final = "device_kind"
 
 # Local REST API answers a single GET; safe to poll often without
 # bothering the device.
-DEFAULT_SCAN_INTERVAL: Final = 60
-MIN_SCAN_INTERVAL: Final = 10
-MAX_SCAN_INTERVAL: Final = 3600
+SCAN_INTERVAL: Final = timedelta(seconds=60)
 
 # The thermostat firmware reports exactly 100.0 for a disconnected or
 # shorted floor/external NTC sensor; treat that reading as "no sensor".
@@ -37,6 +36,14 @@ class DeviceKind(StrEnum):
     PANEL = "panel"
     DIMMER = "dimmer"  # WM Dimmer
 
+
+# WiFi6 thermostats predate the "model" field; fall back to a plain label
+# per product kind instead of leaving the device page blank.
+FALLBACK_MODEL_BY_KIND: Final[dict[str, str]] = {
+    DeviceKind.THERMOSTAT: "WiFi6 Thermostat",
+    DeviceKind.PANEL: "WiFi Panel",
+    DeviceKind.DIMMER: "WM Dimmer",
+}
 
 # parameters written as JSON body vs. as query-string args on POST
 # /api/parameters — confirmed against real WiFi6/WiFi7 hardware (JSON body)

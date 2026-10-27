@@ -321,6 +321,7 @@ FLOWS = {
         "harman_luxury",
         "harmony",
         "hdfury",
+        "heatit_wifi",
         "hegel",
         "helty",
         "heos",

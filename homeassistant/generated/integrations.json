@@ -2917,6 +2917,12 @@
         "zwave"
       ]
     },
+    "heatit_wifi": {
+      "name": "Heatit WiFi",
+      "integration_type": "device",
+      "config_flow": true,
+      "iot_class": "local_polling"
+    },
     "heatmiser": {
       "name": "Heatmiser",
       "integration_type": "hub",

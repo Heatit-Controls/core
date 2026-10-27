@@ -5,31 +5,21 @@ from typing import Any, override
 
 import probatio
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult, OptionsFlow
-from homeassistant.const import CONF_HOST, CONF_NAME
-from homeassistant.core import callback
+from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.const import CONF_HOST
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
-from . import HeatitWiFiConfigEntry
 from .api import HeatitWiFiAPI
-from .const import (
-    CONF_DEVICE_KIND,
-    DEFAULT_SCAN_INTERVAL,
-    DOMAIN,
-    MAX_SCAN_INTERVAL,
-    MIN_SCAN_INTERVAL,
-    DeviceKind,
-)
+from .const import CONF_DEVICE_KIND, DOMAIN, FALLBACK_MODEL_BY_KIND, DeviceKind
 from .device import detect_device_kind
 
 _LOGGER = logging.getLogger(__name__)
 
 STEP_USER_DATA_SCHEMA = probatio.Schema(
     {
-        probatio.Required(CONF_NAME): cv.string,
         probatio.Required(CONF_HOST): cv.string,
     }
 )
@@ -44,9 +34,18 @@ def _normalize_host(host: str) -> str:
 class _ProbeResult:
     """A successful probe of a device at a host."""
 
-    def __init__(self, device_id: str, device_kind: DeviceKind) -> None:
+    def __init__(self, device_id: str, device_kind: DeviceKind, name: str) -> None:
         self.device_id = device_id
         self.device_kind = device_kind
+        self.name = name
+
+
+def _device_name(status: dict[str, Any], device_kind: DeviceKind) -> str:
+    """Return the name the user gave the device in the Heatit app, if any."""
+    if name := status.get("name"):
+        return str(name)
+    model = str(status.get("model") or FALLBACK_MODEL_BY_KIND[device_kind])
+    return model if model.startswith("Heatit") else f"Heatit {model}"
 
 
 class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -58,15 +57,7 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
         """Initialize the flow."""
         self._discovered_host: str | None = None
         self._discovered_kind: DeviceKind | None = None
-
-    @staticmethod
-    @callback
-    @override
-    def async_get_options_flow(
-        config_entry: HeatitWiFiConfigEntry,
-    ) -> HeatitWiFiOptionsFlow:
-        """Create the options flow."""
-        return HeatitWiFiOptionsFlow()
+        self._discovered_name: str | None = None
 
     async def _probe(self, host: str) -> _ProbeResult | None:
         """Probe a host and identify the device there, or None on failure."""
@@ -80,7 +71,7 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
         if device_kind is None:
             _LOGGER.debug("Unrecognized Heatit WiFi device at %s: %s", host, status)
             return None
-        return _ProbeResult(device_id, device_kind)
+        return _ProbeResult(device_id, device_kind, _device_name(status, device_kind))
 
     @override
     async def async_step_user(
@@ -99,9 +90,8 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(result.device_id)
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
-                    title=f"Heatit ({user_input[CONF_NAME]})",
+                    title=result.name,
                     data={
-                        CONF_NAME: user_input[CONF_NAME],
                         CONF_HOST: host,
                         CONF_DEVICE_KIND: result.device_kind,
                     },
@@ -134,29 +124,33 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
 
         self._discovered_host = host
         self._discovered_kind = result.device_kind
-        self.context["title_placeholders"] = {"host": host}
+        self._discovered_name = result.name
+        self.context["title_placeholders"] = {"name": result.name}
         return await self.async_step_zeroconf_confirm()
 
     async def async_step_zeroconf_confirm(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Ask for a name before adding the discovered device."""
+        """Confirm adding the discovered device."""
         assert self._discovered_host is not None
+        assert self._discovered_name is not None
 
         if user_input is not None:
             return self.async_create_entry(
-                title=f"Heatit ({user_input[CONF_NAME]})",
+                title=self._discovered_name,
                 data={
-                    CONF_NAME: user_input[CONF_NAME],
                     CONF_HOST: self._discovered_host,
                     CONF_DEVICE_KIND: self._discovered_kind,
                 },
             )
 
+        self._set_confirm_only()
         return self.async_show_form(
             step_id="zeroconf_confirm",
-            data_schema=probatio.Schema({probatio.Required(CONF_NAME): cv.string}),
-            description_placeholders={"host": self._discovered_host},
+            description_placeholders={
+                "name": self._discovered_name,
+                "host": self._discovered_host,
+            },
         )
 
     @override
@@ -208,29 +202,3 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
             ),
             errors=errors,
         )
-
-
-class HeatitWiFiOptionsFlow(OptionsFlow):
-    """Change the polling interval or the device's address."""
-
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        """Handle the options step."""
-        if user_input is not None:
-            return self.async_create_entry(data=user_input)
-
-        schema = probatio.Schema(
-            {
-                probatio.Required(
-                    "scan_interval",
-                    default=self.config_entry.options.get(
-                        "scan_interval", DEFAULT_SCAN_INTERVAL
-                    ),
-                ): probatio.All(
-                    probatio.Coerce(int),
-                    probatio.Range(min=MIN_SCAN_INTERVAL, max=MAX_SCAN_INTERVAL),
-                ),
-            }
-        )
-        return self.async_show_form(step_id="init", data_schema=schema)

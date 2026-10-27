@@ -1,43 +1,64 @@
 """Tests for the Heatit WiFi config flow."""
 
-from datetime import timedelta
 from ipaddress import ip_address
+from typing import Any
 
 import pytest
 
 from homeassistant.components.heatit_wifi.const import DOMAIN
 from homeassistant.config_entries import SOURCE_USER
-from homeassistant.const import CONF_HOST, CONF_NAME
+from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
-from .conftest import HOST_BY_KIND, STATUS_BY_KIND, THERMOSTAT_HOST, mock_status
+from .conftest import HOST_BY_KIND, STATUS_BY_KIND, mock_status
 
 from tests.common import MockConfigEntry
 from tests.test_util.aiohttp import AiohttpClientMocker
 
 
-@pytest.mark.parametrize("kind", ["thermostat", "panel", "dimmer"])
+@pytest.mark.parametrize(
+    ("kind", "status", "title"),
+    [
+        pytest.param(
+            "thermostat", STATUS_BY_KIND["thermostat"], "Heatit WiFi7", id="model"
+        ),
+        pytest.param(
+            "thermostat",
+            {k: v for k, v in STATUS_BY_KIND["thermostat"].items() if k != "model"},
+            "Heatit WiFi6 Thermostat",
+            id="wifi6_without_model",
+        ),
+        pytest.param("panel", STATUS_BY_KIND["panel"], "Panel hall", id="panel"),
+        pytest.param(
+            "dimmer", STATUS_BY_KIND["dimmer"], "Dimmer living room", id="dimmer"
+        ),
+    ],
+)
 async def test_user_flow_success(
-    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, kind: str
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    kind: str,
+    status: dict[str, Any],
+    title: str,
 ) -> None:
-    """A reachable device of any kind can be added through the user step."""
+    """A reachable device of any kind is added under the name it reports."""
     host = HOST_BY_KIND[kind]
-    mock_status(aioclient_mock, host, STATUS_BY_KIND[kind])
+    mock_status(aioclient_mock, host, status)
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
     )
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
-        {CONF_NAME: "My device", CONF_HOST: host.removeprefix("http://")},
+        {CONF_HOST: host.removeprefix("http://")},
     )
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["data"][CONF_HOST] == host
-    assert result["data"]["device_kind"] == kind
+    assert result["title"] == title
+    assert result["data"] == {CONF_HOST: host, "device_kind": kind}
 
 
 async def test_user_flow_cannot_connect(
@@ -50,7 +71,7 @@ async def test_user_flow_cannot_connect(
         DOMAIN, context={"source": SOURCE_USER}
     )
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {CONF_NAME: "My device", CONF_HOST: "192.168.1.99"}
+        result["flow_id"], {CONF_HOST: "192.168.1.99"}
     )
 
     assert result["type"] is FlowResultType.FORM
@@ -78,11 +99,14 @@ async def test_zeroconf_flow_success(
     )
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "zeroconf_confirm"
+    assert result["description_placeholders"] == {
+        "name": "Heatit WiFi7",
+        "host": "http://192.168.1.50",
+    }
 
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {CONF_NAME: "My thermostat"}
-    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
     assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["title"] == "Heatit WiFi7"
     assert result["data"][CONF_HOST] == "http://192.168.1.50"
     assert result["data"]["device_kind"] == "thermostat"
 
@@ -94,8 +118,8 @@ async def test_zeroconf_flow_updates_known_device(
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id="therm123",
+        title="Thermostat",
         data={
-            CONF_NAME: "Thermostat",
             CONF_HOST: "http://192.168.1.50",
             "device_kind": "thermostat",
         },
@@ -184,7 +208,7 @@ async def test_user_flow_already_configured(
         DOMAIN, context={"source": SOURCE_USER}
     )
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {CONF_NAME: "My device", CONF_HOST: "192.168.1.70"}
+        result["flow_id"], {CONF_HOST: "192.168.1.70"}
     )
 
     assert result["type"] is FlowResultType.ABORT
@@ -204,7 +228,7 @@ async def test_user_flow_unrecognized_device_recovers(
         DOMAIN, context={"source": SOURCE_USER}
     )
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {CONF_NAME: "My device", CONF_HOST: "192.168.1.70"}
+        result["flow_id"], {CONF_HOST: "192.168.1.70"}
     )
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "cannot_connect"}
@@ -212,7 +236,7 @@ async def test_user_flow_unrecognized_device_recovers(
     aioclient_mock.clear_requests()
     mock_status(aioclient_mock, "http://192.168.1.70", STATUS_BY_KIND["thermostat"])
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {CONF_NAME: "My device", CONF_HOST: "192.168.1.70"}
+        result["flow_id"], {CONF_HOST: "192.168.1.70"}
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
 
@@ -298,31 +322,3 @@ async def test_reconfigure_flow_cannot_connect_recovers(
     )
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"
-
-
-async def test_options_flow(
-    hass: HomeAssistant,
-    aioclient_mock: AiohttpClientMocker,
-    thermostat_config_entry: MockConfigEntry,
-) -> None:
-    """The polling interval can be changed, which reloads the entry."""
-    thermostat_config_entry.add_to_hass(hass)
-    mock_status(aioclient_mock, THERMOSTAT_HOST, STATUS_BY_KIND["thermostat"])
-    assert await hass.config_entries.async_setup(thermostat_config_entry.entry_id)
-    await hass.async_block_till_done()
-
-    result = await hass.config_entries.options.async_init(
-        thermostat_config_entry.entry_id
-    )
-    assert result["type"] is FlowResultType.FORM
-    assert result["step_id"] == "init"
-
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"scan_interval": 120}
-    )
-    await hass.async_block_till_done()
-
-    assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert thermostat_config_entry.options == {"scan_interval": 120}
-    coordinator = thermostat_config_entry.runtime_data.coordinator
-    assert coordinator.update_interval == timedelta(seconds=120)
