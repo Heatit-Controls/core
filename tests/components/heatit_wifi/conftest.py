@@ -16,6 +16,8 @@ from tests.test_util.aiohttp import AiohttpClientMocker
 THERMOSTAT_HOST = "http://192.168.1.50"
 PANEL_HOST = "http://192.168.1.51"
 DIMMER_HOST = "http://192.168.1.52"
+RELAY_HOST = "http://192.168.1.53"
+WIFI6_HOST = "http://192.168.1.54"
 
 THERMOSTAT_STATUS: dict[str, Any] = {
     "id": "therm123",
@@ -28,13 +30,31 @@ THERMOSTAT_STATUS: dict[str, Any] = {
     "totalConsumption": 12.3,
     "state": "idle",
     "parameters": {
-        "operatingMode": 1,
+        "disableButtons": 0,
         "sensorMode": 1,
+        "externalSensorFallback": 2,
+        "sensorValue": 1,
+        "internalMinimumTemperatureLimit": 5.0,
+        "internalMaximumTemperatureLimit": 40.0,
+        "floorMinimumTemperatureLimit": 5.0,
+        "floorMaximumTemperatureLimit": 27.0,
+        "externalMinimumTemperatureLimit": 5.0,
+        "externalMaximumTemperatureLimit": 40.0,
+        "internalSensorCalibration": 0.0,
+        "floorSensorCalibration": 0.0,
+        "externalSensorCalibration": 0.0,
+        "regulationMode": False,
+        "temperatureControlHysteresis": 0.5,
+        "temperatureDisplay": False,
+        "activeDisplayBrightness": 100,
+        "standbyDisplayBrightness": 50,
+        "actionAfterError": 0,
         "heatingSetpoint": 21.0,
         "coolingSetpoint": 25.0,
         "ecoSetpoint": 18.0,
-        "disableButtons": 0,
-        "temperatureDisplay": False,
+        "powerRegulatorActiveTime": 20,
+        "operatingMode": 1,
+        "sizeOfLoad": 0,
         "OWD": {"openWindowDetection": False, "activeNow": False, "activeTime": 0},
     },
     "network": {
@@ -42,6 +62,78 @@ THERMOSTAT_STATUS: dict[str, Any] = {
         "ipAddress": "192.168.1.50",
         "wifiSignalStrength": "-40dBm",
         "SSID": "Home",
+    },
+}
+
+# Real /api/status from a WiFi7 (firmware 0.1.16) in relay mode.
+RELAY_STATUS: dict[str, Any] = {
+    "id": "relay123",
+    "name": "THERMOSTAT a0a08c",
+    "room": "",
+    "state": "Off",
+    "currentPower": 0,
+    "totalConsumption": 0.00,
+    "internalTemperature": 21.1,
+    "floorTemperature": 23.9,
+    "externalTemperature": 32.4,
+    "otaProgress": 0,
+    "parameters": {
+        "disableButtons": 0,
+        "sensorMode": 7,
+        "deviceRestoreState": 0,
+        "automaticTurnOff": 0,
+        "automaticTurnOn": 0,
+        "turnOffDelayTime": 0,
+        "invertedOutput": False,
+        "alwaysOn": False,
+        "internalSensorCalibration": 0.0,
+        "floorSensorCalibration": 0.0,
+        "externalSensorCalibration": 0.0,
+        "displayInformation": 0,
+        "activeDisplayBrightness": 100,
+        "standbyDisplayBrightness": 50,
+        "actionAfterError": 0,
+        "sizeOfLoad": 0,
+        "onOff": False,
+    },
+    "blueFusion": {"link": []},
+    "directlink": {"relayControl": []},
+    "network": {
+        "SSID": "Home",
+        "mac": "aa:bb:cc:11:22:44",
+        "ipAddress": "192.168.1.53",
+        "wifiSignalStrength": "-59dBm",
+        "status": "ok",
+    },
+    "firmware": "0.1.16",
+    "model": "Heatit WiFi7",
+}
+
+# Older WiFi6 firmware: no "model" field and a smaller parameter set.
+WIFI6_STATUS: dict[str, Any] = {
+    "id": "wifi6123",
+    "firmware": "4.0",
+    "internalTemperature": 21.5,
+    "floorTemperature": 22.0,
+    "externalTemperature": 100.0,
+    "currentPower": 0,
+    "totalConsumption": 3.2,
+    "state": "Idle",
+    "parameters": {
+        "operatingMode": 1,
+        "sensorMode": 2,
+        "heatingSetpoint": 21.0,
+        "coolingSetpoint": 25.0,
+        "ecoSetpoint": 18.0,
+        "disableButtons": 0,
+        "floorMinimumTemperatureLimit": 5.0,
+        "floorMaximumTemperatureLimit": 27.0,
+        "temperatureControlHysteresis": 0.5,
+    },
+    "network": {
+        "mac": "aa:bb:cc:11:22:55",
+        "ipAddress": "192.168.1.54",
+        "wifiSignalStrength": "-48dBm",
     },
 }
 
@@ -104,11 +196,15 @@ DIMMER_STATUS: dict[str, Any] = {
 
 STATUS_BY_KIND = {
     "thermostat": THERMOSTAT_STATUS,
+    "relay": RELAY_STATUS,
+    "wifi6": WIFI6_STATUS,
     "panel": PANEL_STATUS,
     "dimmer": DIMMER_STATUS,
 }
 HOST_BY_KIND = {
     "thermostat": THERMOSTAT_HOST,
+    "relay": RELAY_HOST,
+    "wifi6": WIFI6_HOST,
     "panel": PANEL_HOST,
     "dimmer": DIMMER_HOST,
 }
@@ -157,7 +253,15 @@ def dimmer_config_entry() -> MockConfigEntry:
     )
 
 
-NAME_BY_KIND = {"thermostat": "Thermostat", "panel": "Panel", "dimmer": "Dimmer"}
+NAME_BY_KIND = {
+    "thermostat": "Thermostat",
+    "relay": "Relay",
+    "wifi6": "WiFi6",
+    "panel": "Panel",
+    "dimmer": "Dimmer",
+}
+# The WiFi7 in relay mode and the WiFi6 are thermostat entries too.
+ENTRY_KIND = {"relay": "thermostat", "wifi6": "thermostat"}
 
 
 def posted_parameters(aioclient_mock: AiohttpClientMocker) -> list[dict[str, Any]]:
@@ -193,7 +297,7 @@ def mock_config_entry(device_kind: str) -> MockConfigEntry:
         title=NAME_BY_KIND[device_kind],
         data={
             CONF_HOST: HOST_BY_KIND[device_kind],
-            "device_kind": device_kind,
+            "device_kind": ENTRY_KIND.get(device_kind, device_kind),
         },
     )
 
@@ -217,7 +321,7 @@ async def init_integration(
     mock_config_entry.add_to_hass(hass)
     with patch(
         "homeassistant.components.heatit_wifi.PLATFORMS_BY_KIND",
-        {DeviceKind(device_kind): platforms},
+        {DeviceKind(ENTRY_KIND.get(device_kind, device_kind)): platforms},
     ):
         assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
         await hass.async_block_till_done()

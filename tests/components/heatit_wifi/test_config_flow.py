@@ -13,7 +13,7 @@ from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
-from .conftest import HOST_BY_KIND, STATUS_BY_KIND, mock_status
+from .conftest import HOST_BY_KIND, RELAY_STATUS, STATUS_BY_KIND, mock_status
 
 from tests.common import MockConfigEntry
 from tests.test_util.aiohttp import AiohttpClientMocker
@@ -30,6 +30,9 @@ from tests.test_util.aiohttp import AiohttpClientMocker
             {k: v for k, v in STATUS_BY_KIND["thermostat"].items() if k != "model"},
             "Heatit WiFi6 Thermostat",
             id="wifi6_without_model",
+        ),
+        pytest.param(
+            "thermostat", RELAY_STATUS, "THERMOSTAT a0a08c", id="wifi7_relay_mode"
         ),
         pytest.param("panel", STATUS_BY_KIND["panel"], "Panel hall", id="panel"),
         pytest.param(

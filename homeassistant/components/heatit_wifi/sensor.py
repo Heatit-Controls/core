@@ -153,9 +153,10 @@ class HeatitWiFiSensor(HeatitWiFiEntity, SensorEntity):
         description: HeatitWiFiSensorDescription,
     ) -> None:
         """Initialize the sensor entity."""
-        super().__init__(coordinator, device_name, device_id, device_kind)
+        super().__init__(
+            coordinator, device_name, device_id, device_kind, description.key
+        )
         self.entity_description = description
-        self._attr_unique_id = f"{device_id}-{description.key}"
 
     @property
     @override

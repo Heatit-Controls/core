@@ -1,27 +1,102 @@
 {
   "entity": {
-    "switch": {
-      "child_lock": { "default": "mdi:account-lock" },
-      "open_window_detection": { "default": "mdi:window-open-variant" },
-      "display_measured_temperature": { "default": "mdi:thermometer" },
-      "external_sensor": { "default": "mdi:thermometer-lines" },
-      "on_off_functionality": { "default": "mdi:toggle-switch" },
-      "always_on": { "default": "mdi:infinity" },
-      "autocalibration": { "default": "mdi:tune" }
+    "button": {
+      "factory_reset": {
+        "default": "mdi:restart-alert"
+      },
+      "reset_energy_meter": {
+        "default": "mdi:counter"
+      },
+      "reset_settings": {
+        "default": "mdi:restore"
+      }
+    },
+    "number": {
+      "action_after_error": {
+        "default": "mdi:restart"
+      },
+      "active_display_brightness": {
+        "default": "mdi:brightness-6"
+      },
+      "automatic_turn_off": {
+        "default": "mdi:timer-off"
+      },
+      "automatic_turn_on": {
+        "default": "mdi:timer-play"
+      },
+      "power_regulator_active_time": {
+        "default": "mdi:percent"
+      },
+      "standby_display_brightness": {
+        "default": "mdi:brightness-4"
+      },
+      "turn_off_delay": {
+        "default": "mdi:timer-sand"
+      }
     },
     "select": {
-      "sensor_mode": { "default": "mdi:thermometer-lines" },
-      "buttons": { "default": "mdi:gesture-tap-button" },
-      "switch_functionality": { "default": "mdi:light-switch" },
-      "allow_multipress": { "default": "mdi:gesture-double-tap" },
-      "double_click_for_100": { "default": "mdi:gesture-double-tap" },
-      "dimming_curve": { "default": "mdi:chart-bell-curve" },
-      "dimming_mode": { "default": "mdi:tune-variant" }
+      "allow_multipress": {
+        "default": "mdi:gesture-double-tap"
+      },
+      "buttons": {
+        "default": "mdi:gesture-tap-button"
+      },
+      "device_restore_state": {
+        "default": "mdi:power-plug"
+      },
+      "dimming_curve": {
+        "default": "mdi:chart-bell-curve"
+      },
+      "dimming_mode": {
+        "default": "mdi:tune-variant"
+      },
+      "display_information": {
+        "default": "mdi:monitor"
+      },
+      "double_click_for_100": {
+        "default": "mdi:gesture-double-tap"
+      },
+      "external_sensor_fallback": {
+        "default": "mdi:thermometer-alert"
+      },
+      "regulation_mode": {
+        "default": "mdi:sine-wave"
+      },
+      "sensor_mode": {
+        "default": "mdi:thermometer-lines"
+      },
+      "sensor_value": {
+        "default": "mdi:resistor"
+      },
+      "switch_functionality": {
+        "default": "mdi:light-switch"
+      }
     },
-    "button": {
-      "reset_energy_meter": { "default": "mdi:counter" },
-      "reset_settings": { "default": "mdi:restore" },
-      "factory_reset": { "default": "mdi:restart-alert" }
+    "switch": {
+      "always_on": {
+        "default": "mdi:infinity"
+      },
+      "autocalibration": {
+        "default": "mdi:tune"
+      },
+      "child_lock": {
+        "default": "mdi:account-lock"
+      },
+      "display_measured_temperature": {
+        "default": "mdi:thermometer"
+      },
+      "external_sensor": {
+        "default": "mdi:thermometer-lines"
+      },
+      "inverted_output": {
+        "default": "mdi:swap-horizontal"
+      },
+      "on_off_functionality": {
+        "default": "mdi:toggle-switch"
+      },
+      "open_window_detection": {
+        "default": "mdi:window-open-variant"
+      }
     }
   }
 }

@@ -367,6 +367,333 @@
     'state': 'enabled',
   })
 # ---
+# name: test_entities[relay][select.relay_display_information-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'relay_state',
+        'power',
+        'energy',
+        'internal_temperature',
+        'external_temperature',
+        'floor_temperature',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.relay_display_information',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Display information',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Display information',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'display_information',
+    'unique_id': 'relay123-display_information',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[relay][select.relay_display_information-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Relay Display information',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'relay_state',
+        'power',
+        'energy',
+        'internal_temperature',
+        'external_temperature',
+        'floor_temperature',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.relay_display_information',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'relay_state',
+  })
+# ---
+# name: test_entities[relay][select.relay_sensor_mode-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'floor',
+        'internal',
+        'internal_with_floor_limit',
+        'external',
+        'external_with_floor_limit',
+        'power_regulator',
+        'external_wireless',
+        'relay',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.relay_sensor_mode',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Sensor mode',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Sensor mode',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'sensor_mode',
+    'unique_id': 'relay123-sensor_mode',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[relay][select.relay_sensor_mode-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Relay Sensor mode',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'floor',
+        'internal',
+        'internal_with_floor_limit',
+        'external',
+        'external_with_floor_limit',
+        'power_regulator',
+        'external_wireless',
+        'relay',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.relay_sensor_mode',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'relay',
+  })
+# ---
+# name: test_entities[relay][select.relay_state_after_power_loss-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'previous',
+        'on',
+        'off',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.relay_state_after_power_loss',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'State after power loss',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'State after power loss',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'device_restore_state',
+    'unique_id': 'relay123-device_restore_state',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[relay][select.relay_state_after_power_loss-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Relay State after power loss',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'previous',
+        'on',
+        'off',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.relay_state_after_power_loss',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'previous',
+  })
+# ---
+# name: test_entities[thermostat][select.thermostat_external_sensor_fallback-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'off',
+        'floor',
+        'internal',
+        'internal_with_floor_limit',
+        'external',
+        'external_with_floor_limit',
+        'power_regulator',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.thermostat_external_sensor_fallback',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'External sensor fallback',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'External sensor fallback',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'external_sensor_fallback',
+    'unique_id': 'therm123-external_sensor_fallback',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[thermostat][select.thermostat_external_sensor_fallback-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Thermostat External sensor fallback',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'off',
+        'floor',
+        'internal',
+        'internal_with_floor_limit',
+        'external',
+        'external_with_floor_limit',
+        'power_regulator',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.thermostat_external_sensor_fallback',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'internal',
+  })
+# ---
+# name: test_entities[thermostat][select.thermostat_regulation_mode-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'hysteresis',
+        'pwm',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.thermostat_regulation_mode',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Regulation mode',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Regulation mode',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'regulation_mode',
+    'unique_id': 'therm123-regulation_mode',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[thermostat][select.thermostat_regulation_mode-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Thermostat Regulation mode',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'hysteresis',
+        'pwm',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.thermostat_regulation_mode',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'hysteresis',
+  })
+# ---
 # name: test_entities[thermostat][select.thermostat_sensor_mode-entry]
   EntityRegistryEntrySnapshot({
     'aliases': list([
@@ -381,6 +708,8 @@
         'external',
         'external_with_floor_limit',
         'power_regulator',
+        'external_wireless',
+        'relay',
       ]),
     }),
     'config_entry_id': <ANY>,
@@ -424,6 +753,8 @@
         'external',
         'external_with_floor_limit',
         'power_regulator',
+        'external_wireless',
+        'relay',
       ]),
     }),
     'context': <ANY>,
@@ -432,5 +763,143 @@
     'last_reported': <ANY>,
     'last_updated': <ANY>,
     'state': 'internal',
+  })
+# ---
+# name: test_entities[thermostat][select.thermostat_sensor_type-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'ntc_10k',
+        'ntc_12k',
+        'ntc_15k',
+        'ntc_22k',
+        'ntc_33k',
+        'ntc_47k',
+        'ntc_6_8k',
+        'ntc_100k',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.thermostat_sensor_type',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Sensor type',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Sensor type',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'sensor_value',
+    'unique_id': 'therm123-sensor_value',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[thermostat][select.thermostat_sensor_type-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Thermostat Sensor type',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'ntc_10k',
+        'ntc_12k',
+        'ntc_15k',
+        'ntc_22k',
+        'ntc_33k',
+        'ntc_47k',
+        'ntc_6_8k',
+        'ntc_100k',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.thermostat_sensor_type',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'ntc_12k',
+  })
+# ---
+# name: test_entities[wifi6][select.wifi6_sensor_mode-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'floor',
+        'internal',
+        'internal_with_floor_limit',
+        'external',
+        'external_with_floor_limit',
+        'power_regulator',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.wifi6_sensor_mode',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Sensor mode',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Sensor mode',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'sensor_mode',
+    'unique_id': 'wifi6123-sensor_mode',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[wifi6][select.wifi6_sensor_mode-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'WiFi6 Sensor mode',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'floor',
+        'internal',
+        'internal_with_floor_limit',
+        'external',
+        'external_with_floor_limit',
+        'power_regulator',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.wifi6_sensor_mode',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'internal_with_floor_limit',
   })
 # ---

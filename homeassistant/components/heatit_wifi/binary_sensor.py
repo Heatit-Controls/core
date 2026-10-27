@@ -15,7 +15,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .const import DeviceKind
-from .entity import HeatitWiFiEntity
+from .entity import HeatitWiFiEntity, reports_parameter
 
 # Read-only; entities never call the API, so unlimited concurrent updates
 # are safe.
@@ -71,6 +71,7 @@ async def async_setup_entry(
         )
         for description in BINARY_SENSOR_DESCRIPTIONS
         if data.device_kind in description.device_kinds
+        and reports_parameter(data, "OWD")
     )
 
 
@@ -88,9 +89,10 @@ class HeatitWiFiBinarySensor(HeatitWiFiEntity, BinarySensorEntity):
         description: HeatitWiFiBinarySensorDescription,
     ) -> None:
         """Initialize the binary sensor entity."""
-        super().__init__(coordinator, device_name, device_id, device_kind)
+        super().__init__(
+            coordinator, device_name, device_id, device_kind, description.key
+        )
         self.entity_description = description
-        self._attr_unique_id = f"{device_id}-{description.key}"
 
     @property
     @override

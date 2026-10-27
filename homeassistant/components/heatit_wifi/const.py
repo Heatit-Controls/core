@@ -14,6 +14,10 @@ CONF_DEVICE_KIND: Final = "device_kind"
 # bothering the device.
 SCAN_INTERVAL: Final = timedelta(seconds=60)
 
+# WiFi7 sensorMode that turns the thermostat into a plain relay ("RELA"),
+# with its own parameter set and no thermostat functions.
+RELAY_SENSOR_MODE: Final = 7
+
 # The thermostat firmware reports exactly 100.0 for a disconnected or
 # shorted floor/external NTC sensor; treat that reading as "no sensor".
 NTC_FAULT_TEMPERATURE: Final = 100.0
@@ -79,24 +83,4 @@ PLATFORMS_BY_KIND: Final[dict[DeviceKind, list[Platform]]] = {
         Platform.SENSOR,
         Platform.SWITCH,
     ],
-}
-
-SENSORMODES: Final[dict[int, str]] = {
-    0: "0: Floor sensor (F)",
-    1: "1: Internal sensor (A)",  # Default sensor mode
-    2: "2: Internal sensor & floor sensor limitation (AF)",
-    3: "3: External sensor (A2)",
-    4: "4: External sensor & floor sensor limitation (A2F)",
-    5: "5: Power regulator mode (PWER)",
-}
-
-SENSORVALUES: Final[dict[int, str]] = {
-    0: "0: 10kOhm NTC",  # Default sensor value
-    1: "1: 12kOhm NTC",
-    2: "2: 15kOhm NTC",
-    3: "3: 22kOhm NTC",
-    4: "4: 33kOhm NTC",
-    5: "5: 47kOhm NTC",
-    6: "6: 6.8kOhm NTC",
-    7: "7: 100kOhm NTC",
 }

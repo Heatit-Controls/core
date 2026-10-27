@@ -11,6 +11,8 @@ _FINGERPRINT_PARAMETER: dict[str, DeviceKind] = {
     "dimLevel": DeviceKind.DIMMER,
     "panelMode": DeviceKind.PANEL,
     "operatingMode": DeviceKind.THERMOSTAT,
+    # A WiFi7 in relay mode reports no thermostat parameters at all.
+    "onOff": DeviceKind.THERMOSTAT,
 }
 
 

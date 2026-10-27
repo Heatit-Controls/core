@@ -27,7 +27,9 @@ def platforms() -> list[Platform]:
     return [Platform.NUMBER]
 
 
-@pytest.mark.parametrize("device_kind", ["thermostat", "panel", "dimmer"])
+@pytest.mark.parametrize(
+    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer"]
+)
 @pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_entities(
     hass: HomeAssistant,
@@ -51,9 +53,9 @@ async def test_entities(
         ),
         pytest.param(
             "thermostat",
-            "number.thermostat_automatic_turn_off",
-            600,
-            {"automaticTurnOff": 600},
+            "number.thermostat_size_of_load",
+            500,
+            {"sizeOfLoad": 500},
             id="thermostat_integer",
         ),
         pytest.param(

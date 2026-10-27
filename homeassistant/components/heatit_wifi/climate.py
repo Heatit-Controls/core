@@ -20,7 +20,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import HeatitWiFiConfigEntry
 from .api import HeatitWiFiAPI
 from .const import DOMAIN, NTC_FAULT_TEMPERATURE, DeviceKind
-from .entity import HeatitWiFiEntity
+from .entity import HeatitWiFiEntity, reports_parameter
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ async def async_setup_entry(
         async_add_entities(
             [HeatitWiFiPanel(data.coordinator, data.api, name, data.device_id)]
         )
-    else:
+    elif reports_parameter(data, "operatingMode"):
         async_add_entities(
             [HeatitWiFiThermostat(data.coordinator, data.api, name, data.device_id)]
         )
@@ -94,21 +94,10 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
         device_id: str,
     ) -> None:
         """Initialize the thermostat entity."""
-        super().__init__(coordinator, device_name, device_id, DeviceKind.THERMOSTAT)
+        super().__init__(
+            coordinator, device_name, device_id, DeviceKind.THERMOSTAT, "thermostat"
+        )
         self._api = api
-        self._attr_unique_id = f"{device_id}-thermostat"
-
-    @property
-    @override
-    def available(self) -> bool:
-        """Unavailable while a WiFi7 runs in Relay mode (sensorMode 7).
-
-        In that mode the device is a plain on/off relay (see the relay
-        switch entity) and the thermostat semantics don't apply.
-        """
-        if not super().available:
-            return False
-        return self._parameters().get("sensorMode") != 7
 
     @property
     @override
@@ -302,9 +291,6 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
             return HVACAction.HEATING
         if normalized == "cooling":
             return HVACAction.COOLING
-        if normalized in ("open", "closed"):
-            # WiFi7 Relay mode; the climate entity is unavailable then.
-            return None
         _LOGGER.error("Unknown state from Heatit: %s", state)
         return None
 
@@ -332,9 +318,8 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
         device_id: str,
     ) -> None:
         """Initialize the panel entity."""
-        super().__init__(coordinator, device_name, device_id, DeviceKind.PANEL)
+        super().__init__(coordinator, device_name, device_id, DeviceKind.PANEL, "panel")
         self._api = api
-        self._attr_unique_id = f"{device_id}-panel"
 
     @property
     @override

@@ -54,8 +54,17 @@
       }
     },
     "number": {
+      "action_after_error": {
+        "name": "Retry after overload or overheat"
+      },
+      "active_display_brightness": {
+        "name": "Active display brightness"
+      },
       "automatic_turn_off": {
         "name": "Automatic turn off"
+      },
+      "automatic_turn_on": {
+        "name": "Automatic turn on"
       },
       "dimming_duration": {
         "name": "Dimming duration"
@@ -63,14 +72,35 @@
       "eco_setpoint": {
         "name": "Eco setpoint"
       },
+      "external_max_temperature": {
+        "name": "External sensor maximum temperature limit"
+      },
+      "external_min_temperature": {
+        "name": "External sensor minimum temperature limit"
+      },
+      "external_sensor_calibration": {
+        "name": "External sensor calibration"
+      },
       "floor_max_temperature": {
         "name": "Floor maximum temperature limit"
       },
       "floor_min_temperature": {
         "name": "Floor minimum temperature limit"
       },
+      "floor_sensor_calibration": {
+        "name": "Floor sensor calibration"
+      },
       "hysteresis": {
         "name": "Hysteresis"
+      },
+      "internal_max_temperature": {
+        "name": "Internal sensor maximum temperature limit"
+      },
+      "internal_min_temperature": {
+        "name": "Internal sensor minimum temperature limit"
+      },
+      "internal_sensor_calibration": {
+        "name": "Internal sensor calibration"
       },
       "maximum_dim_level": {
         "name": "Maximum dim level"
@@ -84,8 +114,20 @@
       "minimum_temperature_limit": {
         "name": "Minimum temperature limit"
       },
+      "power_regulator_active_time": {
+        "name": "Power regulator active time"
+      },
       "sensor_calibration": {
         "name": "Sensor calibration"
+      },
+      "size_of_load": {
+        "name": "Size of load"
+      },
+      "standby_display_brightness": {
+        "name": "Standby display brightness"
+      },
+      "turn_off_delay": {
+        "name": "Turn off delay"
       }
     },
     "select": {
@@ -106,6 +148,14 @@
           "menu_locked": "Menu locked"
         }
       },
+      "device_restore_state": {
+        "name": "State after power loss",
+        "state": {
+          "off": "[%key:common::state::off%]",
+          "on": "[%key:common::state::on%]",
+          "previous": "Restore previous state"
+        }
+      },
       "dimming_curve": {
         "name": "Dimming curve",
         "state": {
@@ -120,6 +170,17 @@
           "trailing_edge": "Trailing edge"
         }
       },
+      "display_information": {
+        "name": "Display information",
+        "state": {
+          "energy": "Total consumption",
+          "external_temperature": "External temperature",
+          "floor_temperature": "Floor temperature",
+          "internal_temperature": "Internal temperature",
+          "power": "Power",
+          "relay_state": "Relay state"
+        }
+      },
       "double_click_for_100": {
         "name": "Double click for 100%",
         "state": {
@@ -129,15 +190,49 @@
           "s2": "Enabled for S2"
         }
       },
+      "external_sensor_fallback": {
+        "name": "External sensor fallback",
+        "state": {
+          "external": "[%key:component::heatit_wifi::entity::select::sensor_mode::state::external%]",
+          "external_with_floor_limit": "[%key:component::heatit_wifi::entity::select::sensor_mode::state::external_with_floor_limit%]",
+          "floor": "[%key:component::heatit_wifi::entity::select::sensor_mode::state::floor%]",
+          "internal": "[%key:component::heatit_wifi::entity::select::sensor_mode::state::internal%]",
+          "internal_with_floor_limit": "[%key:component::heatit_wifi::entity::select::sensor_mode::state::internal_with_floor_limit%]",
+          "off": "[%key:common::state::off%]",
+          "power_regulator": "[%key:component::heatit_wifi::entity::select::sensor_mode::state::power_regulator%]"
+        }
+      },
+      "regulation_mode": {
+        "name": "Regulation mode",
+        "state": {
+          "hysteresis": "Hysteresis",
+          "pwm": "PWM"
+        }
+      },
       "sensor_mode": {
         "name": "Sensor mode",
         "state": {
           "external": "External sensor",
+          "external_wireless": "External wireless sensor",
           "external_with_floor_limit": "External sensor with floor limitation",
           "floor": "Floor sensor",
           "internal": "Internal sensor",
           "internal_with_floor_limit": "Internal sensor with floor limitation",
-          "power_regulator": "Power regulator"
+          "power_regulator": "Power regulator",
+          "relay": "Relay"
+        }
+      },
+      "sensor_value": {
+        "name": "Sensor type",
+        "state": {
+          "ntc_100k": "100 kΩ NTC",
+          "ntc_10k": "10 kΩ NTC",
+          "ntc_12k": "12 kΩ NTC",
+          "ntc_15k": "15 kΩ NTC",
+          "ntc_22k": "22 kΩ NTC",
+          "ntc_33k": "33 kΩ NTC",
+          "ntc_47k": "47 kΩ NTC",
+          "ntc_6_8k": "6.8 kΩ NTC"
         }
       },
       "switch_functionality": {
@@ -185,6 +280,9 @@
       },
       "external_sensor": {
         "name": "External sensor"
+      },
+      "inverted_output": {
+        "name": "Inverted output"
       },
       "on_off_functionality": {
         "name": "On/off only"

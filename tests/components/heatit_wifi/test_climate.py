@@ -19,12 +19,7 @@ from homeassistant.components.climate import (
     HVACAction,
     HVACMode,
 )
-from homeassistant.const import (
-    ATTR_ENTITY_ID,
-    ATTR_TEMPERATURE,
-    STATE_UNAVAILABLE,
-    Platform,
-)
+from homeassistant.const import ATTR_ENTITY_ID, ATTR_TEMPERATURE, Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
@@ -50,7 +45,7 @@ def platforms() -> list[Platform]:
     return [Platform.CLIMATE]
 
 
-@pytest.mark.parametrize("device_kind", ["thermostat", "panel"])
+@pytest.mark.parametrize("device_kind", ["thermostat", "wifi6", "panel"])
 async def test_entities(
     hass: HomeAssistant,
     entity_registry: er.EntityRegistry,
@@ -328,21 +323,6 @@ async def test_thermostat_hvac_action(
     state = hass.states.get(THERMOSTAT_ENTITY_ID)
     assert state
     assert state.attributes[ATTR_HVAC_ACTION] == expected
-
-
-async def test_unavailable_in_relay_mode(
-    hass: HomeAssistant, init_integration: MockConfigEntry
-) -> None:
-    """A WiFi7 in relay mode (sensorMode 7) has no thermostat to control."""
-    coordinator = init_integration.runtime_data.coordinator
-    coordinator.data["parameters"]["sensorMode"] = 7
-    coordinator.data["state"] = "open"
-    coordinator.async_set_updated_data(coordinator.data)
-    await hass.async_block_till_done()
-
-    state = hass.states.get(THERMOSTAT_ENTITY_ID)
-    assert state
-    assert state.state == STATE_UNAVAILABLE
 
 
 @pytest.mark.parametrize("device_kind", ["panel"])

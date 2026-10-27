@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
 from .const import DOMAIN, DeviceKind
-from .entity import HeatitWiFiEntity
+from .entity import HeatitWiFiEntity, reports_parameter
 
 # Serialize writes to the single physical device.
 PARALLEL_UPDATES = 1
@@ -25,6 +25,9 @@ class HeatitWiFiSwitchDescription(SwitchEntityDescription):
 
     device_kinds: set[DeviceKind]
     parameter: str
+    # Where the value lives in the status payload, when not under its
+    # parameter name.
+    status_key: str | None = None
     value_fn: Callable[[dict[str, Any]], bool | None] | None = None
     # Applies a freshly written value to the cached status payload so the
     # UI updates immediately; defaults to a flat parameters[parameter]=value.
@@ -58,6 +61,21 @@ def _set_owd_local(status: dict[str, Any], value: Any) -> None:
 
 
 SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
+    # WiFi7 relay mode: the relay itself is the device's main entity.
+    HeatitWiFiSwitchDescription(
+        key="relay",
+        name=None,
+        device_kinds={DeviceKind.THERMOSTAT},
+        parameter="onOff",
+        entity_category=None,
+    ),
+    HeatitWiFiSwitchDescription(
+        key="inverted_output",
+        translation_key="inverted_output",
+        device_kinds={DeviceKind.THERMOSTAT},
+        parameter="invertedOutput",
+        entity_registry_enabled_default=False,
+    ),
     # Thermostat (WiFi6 / WiFi7)
     HeatitWiFiSwitchDescription(
         key="child_lock",
@@ -72,6 +90,7 @@ SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
         translation_key="open_window_detection",
         device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PANEL},
         parameter="openWindowDetection",
+        status_key="OWD",
         value_fn=_owd_enabled,
         set_local=_set_owd_local,
     ),
@@ -101,7 +120,7 @@ SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
     HeatitWiFiSwitchDescription(
         key="always_on",
         translation_key="always_on",
-        device_kinds={DeviceKind.DIMMER},
+        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.DIMMER},
         parameter="alwaysOn",
         entity_registry_enabled_default=False,
     ),
@@ -134,6 +153,7 @@ async def async_setup_entry(
         )
         for description in SWITCH_DESCRIPTIONS
         if data.device_kind in description.device_kinds
+        and reports_parameter(data, description.status_key or description.parameter)
     )
 
 
@@ -152,10 +172,11 @@ class HeatitWiFiSwitch(HeatitWiFiEntity, SwitchEntity):
         description: HeatitWiFiSwitchDescription,
     ) -> None:
         """Initialize the switch entity."""
-        super().__init__(coordinator, device_name, device_id, device_kind)
+        super().__init__(
+            coordinator, device_name, device_id, device_kind, description.key
+        )
         self._api = api
         self.entity_description = description
-        self._attr_unique_id = f"{device_id}-{description.key}"
         self._value_fn = description.value_fn or _parameter_field(description.parameter)
 
     @property

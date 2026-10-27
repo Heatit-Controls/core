@@ -12,7 +12,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
 from .const import DOMAIN, DeviceKind
-from .entity import HeatitWiFiEntity
+from .entity import HeatitWiFiEntity, reports_parameter
 
 # Serialize writes to the single physical device.
 PARALLEL_UPDATES = 1
@@ -27,6 +27,39 @@ _SENSOR_MODE_OPTIONS = {
     3: "external",
     4: "external_with_floor_limit",
     5: "power_regulator",
+    6: "external_wireless",
+    7: "relay",
+}
+# Sensor modes only WiFi7 firmware has.
+_WIFI7_SENSOR_MODES = frozenset({"external_wireless", "relay"})
+_EXTERNAL_SENSOR_FALLBACK_OPTIONS = {
+    0: "off",
+    1: "floor",
+    2: "internal",
+    3: "internal_with_floor_limit",
+    4: "external",
+    5: "external_with_floor_limit",
+    6: "power_regulator",
+}
+_SENSOR_VALUE_OPTIONS = {
+    0: "ntc_10k",
+    1: "ntc_12k",
+    2: "ntc_15k",
+    3: "ntc_22k",
+    4: "ntc_33k",
+    5: "ntc_47k",
+    6: "ntc_6_8k",
+    7: "ntc_100k",
+}
+_REGULATION_MODE_OPTIONS: dict[bool | int, str] = {False: "hysteresis", True: "pwm"}
+_DEVICE_RESTORE_STATE_OPTIONS = {0: "previous", 1: "on", 2: "off"}
+_DISPLAY_INFORMATION_OPTIONS = {
+    0: "relay_state",
+    1: "power",
+    2: "energy",
+    3: "internal_temperature",
+    4: "external_temperature",
+    5: "floor_temperature",
 }
 _DISABLE_BUTTONS_OPTIONS = {0: "enabled", 1: "disabled", 2: "menu_locked"}
 _SWITCH_FUNCTIONALITY_OPTIONS = {
@@ -61,6 +94,7 @@ class HeatitWiFiSelectDescription(SelectEntityDescription):
     device_kinds: set[DeviceKind]
     parameter: str
     value_by_option: dict[str, bool | int]
+    wifi7_only_options: frozenset[str] = frozenset()
     entity_category: EntityCategory | None = EntityCategory.CONFIG
     entity_registry_enabled_default: bool = True
 
@@ -71,7 +105,8 @@ def _describe(
     parameter: str,
     options: dict[bool | int, str],
     *,
-    entity_registry_enabled_default: bool = True,
+    entity_registry_enabled_default: bool = False,
+    wifi7_only_options: frozenset[str] = frozenset(),
 ) -> HeatitWiFiSelectDescription:
     value_by_option = {option: value for value, option in options.items()}
     return HeatitWiFiSelectDescription(
@@ -82,57 +117,83 @@ def _describe(
         options=list(value_by_option),
         value_by_option=value_by_option,
         entity_registry_enabled_default=entity_registry_enabled_default,
+        wifi7_only_options=wifi7_only_options,
     )
 
 
 SELECT_DESCRIPTIONS: tuple[HeatitWiFiSelectDescription, ...] = (
+    # Switching to or from "relay" reloads the entry with relay entities.
     _describe(
         "sensor_mode",
         {DeviceKind.THERMOSTAT},
         "sensorMode",
         _SENSOR_MODE_OPTIONS,
-        entity_registry_enabled_default=False,
+        entity_registry_enabled_default=True,
+        wifi7_only_options=_WIFI7_SENSOR_MODES,
+    ),
+    _describe(
+        "external_sensor_fallback",
+        {DeviceKind.THERMOSTAT},
+        "externalSensorFallback",
+        _EXTERNAL_SENSOR_FALLBACK_OPTIONS,
+    ),
+    _describe(
+        "sensor_value", {DeviceKind.THERMOSTAT}, "sensorValue", _SENSOR_VALUE_OPTIONS
+    ),
+    _describe(
+        "regulation_mode",
+        {DeviceKind.THERMOSTAT},
+        "regulationMode",
+        _REGULATION_MODE_OPTIONS,
+    ),
+    _describe(
+        "device_restore_state",
+        {DeviceKind.THERMOSTAT},
+        "deviceRestoreState",
+        _DEVICE_RESTORE_STATE_OPTIONS,
+    ),
+    _describe(
+        "display_information",
+        {DeviceKind.THERMOSTAT},
+        "displayInformation",
+        _DISPLAY_INFORMATION_OPTIONS,
     ),
     _describe(
         "buttons",
         {DeviceKind.PANEL},
         "disableButtons",
         _DISABLE_BUTTONS_OPTIONS,
-        entity_registry_enabled_default=False,
     ),
     _describe(
         "switch_functionality",
         {DeviceKind.DIMMER},
         "switchFunctionality",
         _SWITCH_FUNCTIONALITY_OPTIONS,
+        entity_registry_enabled_default=True,
     ),
     _describe(
         "allow_multipress",
         {DeviceKind.DIMMER},
         "allowMultipress",
         _MULTIPRESS_OPTIONS,
-        entity_registry_enabled_default=False,
     ),
     _describe(
         "double_click_for_100",
         {DeviceKind.DIMMER},
         "doubleClickFor100",
         _DOUBLE_CLICK_OPTIONS,
-        entity_registry_enabled_default=False,
     ),
     _describe(
         "dimming_curve",
         {DeviceKind.DIMMER},
         "dimmingCurve",
         _DIMMING_CURVE_OPTIONS,
-        entity_registry_enabled_default=False,
     ),
     _describe(
         "dimming_mode",
         {DeviceKind.DIMMER},
         "dimmingMode",
         _DIMMING_MODE_OPTIONS,
-        entity_registry_enabled_default=False,
     ),
 )
 
@@ -156,6 +217,7 @@ async def async_setup_entry(
         )
         for description in SELECT_DESCRIPTIONS
         if data.device_kind in description.device_kinds
+        and reports_parameter(data, description.parameter)
     )
 
 
@@ -174,11 +236,18 @@ class HeatitWiFiSelect(HeatitWiFiEntity, SelectEntity):
         description: HeatitWiFiSelectDescription,
     ) -> None:
         """Initialize the select entity."""
-        super().__init__(coordinator, device_name, device_id, device_kind)
+        super().__init__(
+            coordinator, device_name, device_id, device_kind, description.key
+        )
         self._api = api
         self.entity_description = description
-        self._attr_unique_id = f"{device_id}-{description.key}"
         self._option_by_value = {v: k for k, v in description.value_by_option.items()}
+        if "WiFi7" not in str((coordinator.data or {}).get("model")):
+            self._attr_options = [
+                option
+                for option in description.options or []
+                if option not in description.wifi7_only_options
+            ]
 
     @property
     @override

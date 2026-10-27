@@ -30,7 +30,9 @@ def platforms() -> list[Platform]:
     return [Platform.SWITCH]
 
 
-@pytest.mark.parametrize("device_kind", ["thermostat", "panel", "dimmer"])
+@pytest.mark.parametrize(
+    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer"]
+)
 @pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_entities(
     hass: HomeAssistant,
@@ -95,6 +97,33 @@ async def test_turn_on_off(
 
     assert posted_parameters(aioclient_mock) == [expected_payload]
     state = hass.states.get(entity_id)
+    assert state
+    assert state.state == expected_state
+
+
+@pytest.mark.parametrize(
+    ("service", "expected_payload", "expected_state"),
+    [
+        (SERVICE_TURN_ON, {"onOff": True}, STATE_ON),
+        (SERVICE_TURN_OFF, {"onOff": False}, STATE_OFF),
+    ],
+)
+@pytest.mark.parametrize("device_kind", ["relay"])
+@pytest.mark.usefixtures("init_integration")
+async def test_relay(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    service: str,
+    expected_payload: dict[str, Any],
+    expected_state: str,
+) -> None:
+    """In relay mode the device's main entity switches the relay."""
+    await hass.services.async_call(
+        SWITCH_DOMAIN, service, {ATTR_ENTITY_ID: "switch.relay"}, blocking=True
+    )
+
+    assert posted_parameters(aioclient_mock) == [expected_payload]
+    state = hass.states.get("switch.relay")
     assert state
     assert state.state == expected_state
 

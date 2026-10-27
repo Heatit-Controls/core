@@ -88,10 +88,11 @@ class HeatitWiFiResetButton(HeatitWiFiEntity, ButtonEntity):
         description: HeatitWiFiButtonDescription,
     ) -> None:
         """Initialize the button entity."""
-        super().__init__(coordinator, device_name, device_id, device_kind)
+        super().__init__(
+            coordinator, device_name, device_id, device_kind, description.key
+        )
         self._api = api
         self.entity_description = description
-        self._attr_unique_id = f"{device_id}-{description.key}"
 
     @override
     async def async_press(self) -> None:

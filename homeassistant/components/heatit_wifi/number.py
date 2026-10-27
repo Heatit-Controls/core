@@ -10,7 +10,13 @@ from homeassistant.components.number import (
     NumberEntityDescription,
     NumberMode,
 )
-from homeassistant.const import EntityCategory, UnitOfTemperature, UnitOfTime
+from homeassistant.const import (
+    PERCENTAGE,
+    EntityCategory,
+    UnitOfPower,
+    UnitOfTemperature,
+    UnitOfTime,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -18,7 +24,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
 from .const import DOMAIN, DeviceKind
-from .entity import HeatitWiFiEntity
+from .entity import HeatitWiFiEntity, reports_parameter
 
 # Serialize writes to the single physical device.
 PARALLEL_UPDATES = 1
@@ -60,9 +66,54 @@ def _temperature_limit(
     )
 
 
+def _calibration(key: str, parameter: str) -> HeatitWiFiNumberDescription:
+    return HeatitWiFiNumberDescription(
+        key=key,
+        translation_key=key,
+        device_kinds={DeviceKind.THERMOSTAT},
+        parameter=parameter,
+        entity_registry_enabled_default=False,
+        device_class=NumberDeviceClass.TEMPERATURE_DELTA,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_min_value=-6.0,
+        native_max_value=6.0,
+        native_step=0.1,
+    )
+
+
+def _brightness(key: str, parameter: str, minimum: int) -> HeatitWiFiNumberDescription:
+    return HeatitWiFiNumberDescription(
+        key=key,
+        translation_key=key,
+        device_kinds={DeviceKind.THERMOSTAT},
+        parameter=parameter,
+        entity_registry_enabled_default=False,
+        native_unit_of_measurement=PERCENTAGE,
+        native_min_value=minimum,
+        native_max_value=100,
+        native_step=10,
+        mode=NumberMode.SLIDER,
+    )
+
+
+def _seconds(key: str, parameter: str, maximum: int) -> HeatitWiFiNumberDescription:
+    return HeatitWiFiNumberDescription(
+        key=key,
+        translation_key=key,
+        device_kinds={DeviceKind.THERMOSTAT},
+        parameter=parameter,
+        entity_registry_enabled_default=False,
+        device_class=NumberDeviceClass.DURATION,
+        native_unit_of_measurement=UnitOfTime.SECONDS,
+        native_min_value=0,
+        native_max_value=maximum,
+        native_step=1,
+    )
+
+
 NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
-    # Thermostat (WiFi6 / WiFi7) — parameter names confirmed against real
-    # hardware in thanoskas/heatit_wifi.
+    # Thermostat (WiFi6 / WiFi7, both modes). Only the ones the device
+    # reports in its current mode are created (see reports_parameter).
     HeatitWiFiNumberDescription(
         key="hysteresis",
         translation_key="hysteresis",
@@ -86,17 +137,59 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         "floorMaximumTemperatureLimit",
         enabled=True,
     ),
+    _temperature_limit(
+        "internal_min_temperature",
+        {DeviceKind.THERMOSTAT},
+        "internalMinimumTemperatureLimit",
+    ),
+    _temperature_limit(
+        "internal_max_temperature",
+        {DeviceKind.THERMOSTAT},
+        "internalMaximumTemperatureLimit",
+    ),
+    _temperature_limit(
+        "external_min_temperature",
+        {DeviceKind.THERMOSTAT},
+        "externalMinimumTemperatureLimit",
+    ),
+    _temperature_limit(
+        "external_max_temperature",
+        {DeviceKind.THERMOSTAT},
+        "externalMaximumTemperatureLimit",
+    ),
+    _calibration("internal_sensor_calibration", "internalSensorCalibration"),
+    _calibration("floor_sensor_calibration", "floorSensorCalibration"),
+    _calibration("external_sensor_calibration", "externalSensorCalibration"),
     HeatitWiFiNumberDescription(
-        key="automatic_turn_off",
-        translation_key="automatic_turn_off",
+        key="power_regulator_active_time",
+        translation_key="power_regulator_active_time",
         device_kinds={DeviceKind.THERMOSTAT},
-        parameter="automaticTurnOff",
-        native_min_value=0,
-        native_max_value=86400,
+        parameter="powerRegulatorActiveTime",
+        native_min_value=10,
+        native_max_value=100,
         native_step=1,
-        native_unit_of_measurement=UnitOfTime.SECONDS,
+        native_unit_of_measurement=PERCENTAGE,
         entity_registry_enabled_default=False,
     ),
+    _brightness("active_display_brightness", "activeDisplayBrightness", 10),
+    _brightness("standby_display_brightness", "standbyDisplayBrightness", 0),
+    _seconds("action_after_error", "actionAfterError", 65535),
+    HeatitWiFiNumberDescription(
+        key="size_of_load",
+        translation_key="size_of_load",
+        device_kinds={DeviceKind.THERMOSTAT},
+        parameter="sizeOfLoad",
+        device_class=NumberDeviceClass.POWER,
+        native_min_value=0,
+        native_max_value=9900,
+        native_step=100,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        entity_registry_enabled_default=False,
+    ),
+    # Relay mode only
+    _seconds("automatic_turn_off", "automaticTurnOff", 86400),
+    _seconds("automatic_turn_on", "automaticTurnOn", 86400),
+    _seconds("turn_off_delay", "turnOffDelayTime", 60),
     # Panel — parameter names from Heatit's WiFi Panel OpenAPI spec.
     HeatitWiFiNumberDescription(
         key="eco_setpoint",
@@ -196,6 +289,7 @@ async def async_setup_entry(
         )
         for description in NUMBER_DESCRIPTIONS
         if data.device_kind in description.device_kinds
+        and reports_parameter(data, description.parameter)
     )
 
 
@@ -214,10 +308,11 @@ class HeatitWiFiNumber(HeatitWiFiEntity, NumberEntity):
         description: HeatitWiFiNumberDescription,
     ) -> None:
         """Initialize the number entity."""
-        super().__init__(coordinator, device_name, device_id, device_kind)
+        super().__init__(
+            coordinator, device_name, device_id, device_kind, description.key
+        )
         self._api = api
         self.entity_description = description
-        self._attr_unique_id = f"{device_id}-{description.key}"
 
     @property
     @override

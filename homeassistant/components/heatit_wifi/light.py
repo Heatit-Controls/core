@@ -44,9 +44,10 @@ class HeatitWiFiDimmer(HeatitWiFiEntity, LightEntity):
         device_id: str,
     ) -> None:
         """Initialize the dimmer entity."""
-        super().__init__(coordinator, device_name, device_id, DeviceKind.DIMMER)
+        super().__init__(
+            coordinator, device_name, device_id, DeviceKind.DIMMER, "dimmer"
+        )
         self._api = api
-        self._attr_unique_id = f"{device_id}-dimmer"
 
     @property
     @override

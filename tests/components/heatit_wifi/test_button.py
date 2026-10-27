@@ -21,7 +21,9 @@ def platforms() -> list[Platform]:
     return [Platform.BUTTON]
 
 
-@pytest.mark.parametrize("device_kind", ["thermostat", "panel", "dimmer"])
+@pytest.mark.parametrize(
+    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer"]
+)
 @pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_entities(
     hass: HomeAssistant,

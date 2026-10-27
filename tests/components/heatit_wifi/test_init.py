@@ -8,8 +8,9 @@ import pytest
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import STATE_UNAVAILABLE, Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 
-from .conftest import HOST_BY_KIND, STATUS_BY_KIND, mock_status
+from .conftest import HOST_BY_KIND, RELAY_STATUS, STATUS_BY_KIND, mock_status
 
 from tests.common import MockConfigEntry, async_fire_time_changed
 from tests.test_util.aiohttp import AiohttpClientMocker
@@ -93,3 +94,36 @@ async def test_unavailable_when_polling_fails(
     state = hass.states.get("climate.thermostat")
     assert state
     assert state.state == "heat"
+
+
+@pytest.mark.parametrize("platforms", [[Platform.CLIMATE, Platform.SWITCH]])
+async def test_relay_mode_switch_swaps_entities(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    entity_registry: er.EntityRegistry,
+    init_integration: MockConfigEntry,
+) -> None:
+    """Switching a WiFi7 to relay mode and back swaps thermostat and relay entities."""
+    host = HOST_BY_KIND["thermostat"]
+    relay_status = {**RELAY_STATUS, "id": STATUS_BY_KIND["thermostat"]["id"]}
+    assert hass.states.get("climate.thermostat")
+    assert not hass.states.get("switch.thermostat")
+
+    aioclient_mock.clear_requests()
+    mock_status(aioclient_mock, host, relay_status)
+    await init_integration.runtime_data.coordinator.async_refresh()
+    await hass.async_block_till_done()
+
+    assert init_integration.runtime_data.relay_mode
+    assert not entity_registry.async_get("climate.thermostat")
+    assert not entity_registry.async_get("switch.thermostat_open_window_detection")
+    assert hass.states.get("switch.thermostat")
+
+    aioclient_mock.clear_requests()
+    mock_status(aioclient_mock, host, STATUS_BY_KIND["thermostat"])
+    await init_integration.runtime_data.coordinator.async_refresh()
+    await hass.async_block_till_done()
+
+    assert not init_integration.runtime_data.relay_mode
+    assert hass.states.get("climate.thermostat")
+    assert not entity_registry.async_get("switch.thermostat")
