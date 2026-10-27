@@ -1,0 +1,436 @@
+# serializer version: 1
+# name: test_entities[dimmer][select.dimmer_dimming_curve-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'linear',
+        'logarithmic',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.dimmer_dimming_curve',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Dimming curve',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Dimming curve',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'dimming_curve',
+    'unique_id': 'dimmer123-dimming_curve',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[dimmer][select.dimmer_dimming_curve-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Dimmer Dimming curve',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'linear',
+        'logarithmic',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.dimmer_dimming_curve',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'linear',
+  })
+# ---
+# name: test_entities[dimmer][select.dimmer_dimming_mode-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'trailing_edge',
+        'leading_edge',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.dimmer_dimming_mode',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Dimming mode',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Dimming mode',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'dimming_mode',
+    'unique_id': 'dimmer123-dimming_mode',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[dimmer][select.dimmer_dimming_mode-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Dimmer Dimming mode',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'trailing_edge',
+        'leading_edge',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.dimmer_dimming_mode',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'trailing_edge',
+  })
+# ---
+# name: test_entities[dimmer][select.dimmer_double_click_for_100-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'disabled',
+        's1',
+        's2',
+        's1_and_s2',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.dimmer_double_click_for_100',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Double click for 100%',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Double click for 100%',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'double_click_for_100',
+    'unique_id': 'dimmer123-double_click_for_100',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[dimmer][select.dimmer_double_click_for_100-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Dimmer Double click for 100%',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'disabled',
+        's1',
+        's2',
+        's1_and_s2',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.dimmer_double_click_for_100',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'disabled',
+  })
+# ---
+# name: test_entities[dimmer][select.dimmer_multipress_scenes-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'disabled',
+        's1_scene',
+        's2_scene',
+        's1_and_s2_scene',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.dimmer_multipress_scenes',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Multipress scenes',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Multipress scenes',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'allow_multipress',
+    'unique_id': 'dimmer123-allow_multipress',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[dimmer][select.dimmer_multipress_scenes-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Dimmer Multipress scenes',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'disabled',
+        's1_scene',
+        's2_scene',
+        's1_and_s2_scene',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.dimmer_multipress_scenes',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 's2_scene',
+  })
+# ---
+# name: test_entities[dimmer][select.dimmer_switch_functionality-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'scene_controller',
+        's1_s2_load_and_scene',
+        's1_load',
+        's2_load',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.dimmer_switch_functionality',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Switch functionality',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Switch functionality',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'switch_functionality',
+    'unique_id': 'dimmer123-switch_functionality',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[dimmer][select.dimmer_switch_functionality-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Dimmer Switch functionality',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'scene_controller',
+        's1_s2_load_and_scene',
+        's1_load',
+        's2_load',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.dimmer_switch_functionality',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 's1_s2_load_and_scene',
+  })
+# ---
+# name: test_entities[panel][select.panel_buttons-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'enabled',
+        'disabled',
+        'menu_locked',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.panel_buttons',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Buttons',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Buttons',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'buttons',
+    'unique_id': 'panel123-buttons',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[panel][select.panel_buttons-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Panel Buttons',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'enabled',
+        'disabled',
+        'menu_locked',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.panel_buttons',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'enabled',
+  })
+# ---
+# name: test_entities[thermostat][select.thermostat_sensor_mode-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'floor',
+        'internal',
+        'internal_with_floor_limit',
+        'external',
+        'external_with_floor_limit',
+        'power_regulator',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.thermostat_sensor_mode',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Sensor mode',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Sensor mode',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'sensor_mode',
+    'unique_id': 'therm123-sensor_mode',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[thermostat][select.thermostat_sensor_mode-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Thermostat Sensor mode',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'floor',
+        'internal',
+        'internal_with_floor_limit',
+        'external',
+        'external_with_floor_limit',
+        'power_regulator',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.thermostat_sensor_mode',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'internal',
+  })
+# ---

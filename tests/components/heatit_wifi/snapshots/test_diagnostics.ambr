@@ -1,0 +1,136 @@
+# serializer version: 1
+# name: test_diagnostics[dimmer]
+  dict({
+    'device_kind': 'dimmer',
+    'entry': dict({
+      'data': dict({
+        'device_kind': 'dimmer',
+        'host': '**REDACTED**',
+        'name': 'Dimmer',
+      }),
+      'options': dict({
+      }),
+    }),
+    'last_update_success': True,
+    'status': dict({
+      'currentPower': 0,
+      'firmware': '5.0',
+      'id': '**REDACTED**',
+      'model': 'Heatit WM Dimmer',
+      'name': 'Dimmer living room',
+      'network': dict({
+        'ipAddress': '**REDACTED**',
+        'mac': '**REDACTED**',
+        'wifiSignalStrength': '-45dBm',
+      }),
+      'parameters': dict({
+        'allowMultipress': 2,
+        'alwaysOn': False,
+        'dimLevel': 50,
+        'dimmerState': False,
+        'dimmingCurve': False,
+        'dimmingMode': False,
+        'disableEnableAutocalibration': True,
+        'doubleClickFor100': 0,
+        'maximumDimLevel': 90,
+        'minimumDimLevel': 15,
+        'onOffFunctionality': False,
+        'switchFunctionality': 1,
+      }),
+      'state': False,
+      'totalConsumption': 5.0,
+    }),
+  })
+# ---
+# name: test_diagnostics[panel]
+  dict({
+    'device_kind': 'panel',
+    'entry': dict({
+      'data': dict({
+        'device_kind': 'panel',
+        'host': '**REDACTED**',
+        'name': 'Panel',
+      }),
+      'options': dict({
+      }),
+    }),
+    'last_update_success': True,
+    'status': dict({
+      'currentPower': 1500,
+      'firmware': '1.21',
+      'id': '**REDACTED**',
+      'model': 'Heatit WiFi Panel',
+      'name': 'Panel hall',
+      'network': dict({
+        'ipAddress': '**REDACTED**',
+        'mac': '**REDACTED**',
+        'wifiSignalStrength': '-50dBm',
+      }),
+      'parameters': dict({
+        'OWD': dict({
+          'activeNow': False,
+          'activeTime': 0,
+          'openWindowDetection': False,
+        }),
+        'disableButtons': 0,
+        'ecoSetpoint': 18.0,
+        'heatingSetpoint': 21.0,
+        'maximumTemperatureLimit': 40.0,
+        'minimumTemperatureLimit': 5.0,
+        'panelMode': 1,
+        'sensorCalibration': 0.0,
+        'sensorMode': False,
+        'temperatureDisplay': False,
+      }),
+      'roomTemperature': 22.2,
+      'state': 'Idle',
+      'totalConsumption': 624.25,
+    }),
+  })
+# ---
+# name: test_diagnostics[thermostat]
+  dict({
+    'device_kind': 'thermostat',
+    'entry': dict({
+      'data': dict({
+        'device_kind': 'thermostat',
+        'host': '**REDACTED**',
+        'name': 'Thermostat',
+      }),
+      'options': dict({
+      }),
+    }),
+    'last_update_success': True,
+    'status': dict({
+      'currentPower': 0,
+      'externalTemperature': 100.0,
+      'firmware': '0.1.13',
+      'floorTemperature': 100.0,
+      'id': '**REDACTED**',
+      'internalTemperature': 21.5,
+      'model': 'Heatit WiFi7',
+      'network': dict({
+        'SSID': '**REDACTED**',
+        'ipAddress': '**REDACTED**',
+        'mac': '**REDACTED**',
+        'wifiSignalStrength': '-40dBm',
+      }),
+      'parameters': dict({
+        'OWD': dict({
+          'activeNow': False,
+          'activeTime': 0,
+          'openWindowDetection': False,
+        }),
+        'coolingSetpoint': 25.0,
+        'disableButtons': 0,
+        'ecoSetpoint': 18.0,
+        'heatingSetpoint': 21.0,
+        'operatingMode': 1,
+        'sensorMode': 1,
+        'temperatureDisplay': False,
+      }),
+      'state': 'idle',
+      'totalConsumption': 12.3,
+    }),
+  })
+# ---

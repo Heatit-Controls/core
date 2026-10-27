@@ -1,7 +1,6 @@
 """Tests for the Heatit WiFi config flow."""
 
-from __future__ import annotations
-
+from datetime import timedelta
 from ipaddress import ip_address
 
 import pytest
@@ -11,9 +10,10 @@ from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import CONF_HOST, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.helpers.service_info.dhcp import DhcpServiceInfo
 from homeassistant.helpers.service_info.zeroconf import ZeroconfServiceInfo
 
-from .conftest import HOST_BY_KIND, STATUS_BY_KIND, mock_status
+from .conftest import HOST_BY_KIND, STATUS_BY_KIND, THERMOSTAT_HOST, mock_status
 
 from tests.common import MockConfigEntry
 from tests.test_util.aiohttp import AiohttpClientMocker
@@ -31,7 +31,8 @@ async def test_user_flow_success(
         DOMAIN, context={"source": SOURCE_USER}
     )
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {CONF_NAME: "My device", CONF_HOST: host.removeprefix("http://")}
+        result["flow_id"],
+        {CONF_NAME: "My device", CONF_HOST: host.removeprefix("http://")},
     )
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
@@ -93,7 +94,11 @@ async def test_zeroconf_flow_updates_known_device(
     entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id="therm123",
-        data={CONF_NAME: "Thermostat", CONF_HOST: "http://192.168.1.50", "device_kind": "thermostat"},
+        data={
+            CONF_NAME: "Thermostat",
+            CONF_HOST: "http://192.168.1.50",
+            "device_kind": "thermostat",
+        },
     )
     entry.add_to_hass(hass)
     mock_status(aioclient_mock, "http://192.168.1.60", STATUS_BY_KIND["thermostat"])
@@ -118,7 +123,9 @@ async def test_zeroconf_flow_updates_known_device(
 
 
 async def test_reconfigure_flow_success(
-    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, thermostat_config_entry: MockConfigEntry
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    thermostat_config_entry: MockConfigEntry,
 ) -> None:
     """The host can be changed without recreating the entry."""
     thermostat_config_entry.add_to_hass(hass)
@@ -135,7 +142,9 @@ async def test_reconfigure_flow_success(
 
 
 async def test_reconfigure_flow_different_device(
-    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, thermostat_config_entry: MockConfigEntry
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    thermostat_config_entry: MockConfigEntry,
 ) -> None:
     """Pointing an entry at a different physical device is rejected."""
     thermostat_config_entry.add_to_hass(hass)
@@ -149,3 +158,171 @@ async def test_reconfigure_flow_different_device(
 
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "different_device"
+
+
+ZEROCONF_DISCOVERY = ZeroconfServiceInfo(
+    ip_address=ip_address("192.168.1.70"),
+    ip_addresses=[ip_address("192.168.1.70")],
+    hostname="tf-A0A08E.local.",
+    name="directlink-17._tf._tcp.local.",
+    port=80,
+    type="_tf._tcp.local.",
+    properties={},
+)
+
+
+async def test_user_flow_already_configured(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    thermostat_config_entry: MockConfigEntry,
+) -> None:
+    """Adding a device that already has an entry aborts."""
+    thermostat_config_entry.add_to_hass(hass)
+    mock_status(aioclient_mock, "http://192.168.1.70", STATUS_BY_KIND["thermostat"])
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_NAME: "My device", CONF_HOST: "192.168.1.70"}
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
+
+
+async def test_user_flow_unrecognized_device_recovers(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """An unknown product reports cannot_connect, and a retry can still succeed."""
+    aioclient_mock.get(
+        "http://192.168.1.70/api/status",
+        json={"id": "future123", "parameters": {"somethingNew": 1}},
+    )
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_USER}
+    )
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_NAME: "My device", CONF_HOST: "192.168.1.70"}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "cannot_connect"}
+
+    aioclient_mock.clear_requests()
+    mock_status(aioclient_mock, "http://192.168.1.70", STATUS_BY_KIND["thermostat"])
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_NAME: "My device", CONF_HOST: "192.168.1.70"}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+
+
+async def test_zeroconf_flow_cannot_connect(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A discovered host that doesn't answer is dropped."""
+    aioclient_mock.get("http://192.168.1.70/api/status", exc=TimeoutError)
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "zeroconf"}, data=ZEROCONF_DISCOVERY
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "cannot_connect"
+
+
+async def test_dhcp_flow_updates_known_device(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    thermostat_config_entry: MockConfigEntry,
+) -> None:
+    """A new DHCP lease for a known device updates its host."""
+    thermostat_config_entry.add_to_hass(hass)
+    mock_status(aioclient_mock, "http://192.168.1.70", STATUS_BY_KIND["thermostat"])
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": "dhcp"},
+        data=DhcpServiceInfo(
+            ip="192.168.1.70", hostname="tf-a0a08e", macaddress="aabbcc112233"
+        ),
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
+    assert thermostat_config_entry.data[CONF_HOST] == "http://192.168.1.70"
+
+
+async def test_dhcp_flow_cannot_connect(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    thermostat_config_entry: MockConfigEntry,
+) -> None:
+    """A DHCP lease the device doesn't answer on leaves the entry unchanged."""
+    thermostat_config_entry.add_to_hass(hass)
+    aioclient_mock.get("http://192.168.1.70/api/status", exc=TimeoutError)
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": "dhcp"},
+        data=DhcpServiceInfo(
+            ip="192.168.1.70", hostname="tf-a0a08e", macaddress="aabbcc112233"
+        ),
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "cannot_connect"
+    assert thermostat_config_entry.data[CONF_HOST] == "http://192.168.1.50"
+
+
+async def test_reconfigure_flow_cannot_connect_recovers(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    thermostat_config_entry: MockConfigEntry,
+) -> None:
+    """An unreachable new host shows an error and the user can try again."""
+    thermostat_config_entry.add_to_hass(hass)
+    aioclient_mock.get("http://192.168.1.99/api/status", exc=TimeoutError)
+
+    result = await thermostat_config_entry.start_reconfigure_flow(hass)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_HOST: "192.168.1.99"}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "cannot_connect"}
+
+    aioclient_mock.clear_requests()
+    mock_status(aioclient_mock, "http://192.168.1.99", STATUS_BY_KIND["thermostat"])
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_HOST: "192.168.1.99"}
+    )
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+
+
+async def test_options_flow(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    thermostat_config_entry: MockConfigEntry,
+) -> None:
+    """The polling interval can be changed, which reloads the entry."""
+    thermostat_config_entry.add_to_hass(hass)
+    mock_status(aioclient_mock, THERMOSTAT_HOST, STATUS_BY_KIND["thermostat"])
+    assert await hass.config_entries.async_setup(thermostat_config_entry.entry_id)
+    await hass.async_block_till_done()
+
+    result = await hass.config_entries.options.async_init(
+        thermostat_config_entry.entry_id
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "init"
+
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {"scan_interval": 120}
+    )
+    await hass.async_block_till_done()
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert thermostat_config_entry.options == {"scan_interval": 120}
+    coordinator = thermostat_config_entry.runtime_data.coordinator
+    assert coordinator.update_interval == timedelta(seconds=120)
