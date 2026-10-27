@@ -31,9 +31,7 @@ from tests.test_util.aiohttp import AiohttpClientMocker
             "Heatit WiFi6 Thermostat",
             id="wifi6_without_model",
         ),
-        pytest.param(
-            "thermostat", RELAY_STATUS, "THERMOSTAT a0a08c", id="wifi7_relay_mode"
-        ),
+        pytest.param("thermostat", RELAY_STATUS, "Relay hall", id="wifi7_relay_mode"),
         pytest.param("panel", STATUS_BY_KIND["panel"], "Panel hall", id="panel"),
         pytest.param(
             "dimmer", STATUS_BY_KIND["dimmer"], "Dimmer living room", id="dimmer"
@@ -67,7 +65,7 @@ async def test_user_flow_success(
 async def test_user_flow_cannot_connect(
     hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
 ) -> None:
-    """A device that never answers reports cannot_connect and stays on the form."""
+    """A device that doesn't answer shows an error, and a retry can succeed."""
     aioclient_mock.get("http://192.168.1.99/api/status", exc=TimeoutError)
 
     result = await hass.config_entries.flow.async_init(
@@ -79,6 +77,13 @@ async def test_user_flow_cannot_connect(
 
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "cannot_connect"}
+
+    aioclient_mock.clear_requests()
+    mock_status(aioclient_mock, "http://192.168.1.99", STATUS_BY_KIND["thermostat"])
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_HOST: "192.168.1.99"}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
 
 
 async def test_zeroconf_flow_success(
@@ -101,7 +106,7 @@ async def test_zeroconf_flow_success(
         ),
     )
     assert result["type"] is FlowResultType.FORM
-    assert result["step_id"] == "zeroconf_confirm"
+    assert result["step_id"] == "discovery_confirm"
     assert result["description_placeholders"] == {
         "name": "Heatit WiFi7",
         "host": "http://192.168.1.50",
@@ -325,3 +330,27 @@ async def test_reconfigure_flow_cannot_connect_recovers(
     )
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "reconfigure_successful"
+
+
+async def test_dhcp_flow_offers_removed_device(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A device seen via DHCP without a config entry is offered for setup."""
+    mock_status(aioclient_mock, "http://192.168.1.70", STATUS_BY_KIND["thermostat"])
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": "dhcp"},
+        data=DhcpServiceInfo(
+            ip="192.168.1.70", hostname="tf-a0a08e", macaddress="aabbcc112233"
+        ),
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "discovery_confirm"
+
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"] == {
+        CONF_HOST: "http://192.168.1.70",
+        "device_kind": "thermostat",
+    }

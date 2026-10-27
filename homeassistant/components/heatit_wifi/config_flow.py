@@ -122,13 +122,18 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
         # this is what makes DHCP lease changes a non-event.
         self._abort_if_unique_id_configured(updates={CONF_HOST: host})
 
+        return await self._async_confirm_discovered(host, result)
+
+    async def _async_confirm_discovered(
+        self, host: str, result: _ProbeResult
+    ) -> ConfigFlowResult:
         self._discovered_host = host
         self._discovered_kind = result.device_kind
         self._discovered_name = result.name
         self.context["title_placeholders"] = {"name": result.name}
-        return await self.async_step_zeroconf_confirm()
+        return await self.async_step_discovery_confirm()
 
-    async def async_step_zeroconf_confirm(
+    async def async_step_discovery_confirm(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Confirm adding the discovered device."""
@@ -146,7 +151,7 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
 
         self._set_confirm_only()
         return self.async_show_form(
-            step_id="zeroconf_confirm",
+            step_id="discovery_confirm",
             description_placeholders={
                 "name": self._discovered_name,
                 "host": self._discovered_host,
@@ -159,10 +164,11 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Follow an already-configured device to its new DHCP lease.
 
-        The "registered_devices" matcher only fires for a MAC already
-        known to a config entry, so this never creates a new entry —
-        WiFi6 V1 and Panel V1 (no mDNS) still need manual setup, but stay
-        reachable across DHCP lease changes once added.
+        The "registered_devices" matcher fires for a MAC already known to
+        a device in the registry, so this mostly updates an existing
+        entry's host. That keeps WiFi6 V1 and Panel V1 (no mDNS, manual
+        setup only) reachable across lease changes. If the entry was
+        removed meanwhile, offer the device again like a discovery.
         """
         host = _normalize_host(discovery_info.ip)
         result = await self._probe(host)
@@ -171,7 +177,7 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
 
         await self.async_set_unique_id(result.device_id)
         self._abort_if_unique_id_configured(updates={CONF_HOST: host})
-        return self.async_abort(reason="cannot_connect")
+        return await self._async_confirm_discovered(host, result)
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None

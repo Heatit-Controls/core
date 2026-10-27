@@ -21,7 +21,7 @@ from homeassistant.components.climate import (
 )
 from homeassistant.const import ATTR_ENTITY_ID, ATTR_TEMPERATURE, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 
 from .conftest import (
@@ -173,7 +173,7 @@ async def test_eco_setpoint_follows_preset(hass: HomeAssistant) -> None:
         ("panel", PANEL_ENTITY_ID, "panelMode"),
     ],
 )
-async def test_set_temperature_ignored_when_off(
+async def test_set_temperature_rejected_when_off(
     hass: HomeAssistant,
     aioclient_mock: AiohttpClientMocker,
     init_integration: MockConfigEntry,
@@ -181,18 +181,19 @@ async def test_set_temperature_ignored_when_off(
     entity_id: str,
     mode_parameter: str,
 ) -> None:
-    """Setting a temperature while off writes nothing to the device."""
+    """Setting a temperature while off is rejected without writing anything."""
     coordinator = init_integration.runtime_data.coordinator
     coordinator.data["parameters"][mode_parameter] = 0
     coordinator.async_set_updated_data(coordinator.data)
     await hass.async_block_till_done()
 
-    await hass.services.async_call(
-        CLIMATE_DOMAIN,
-        SERVICE_SET_TEMPERATURE,
-        {ATTR_ENTITY_ID: entity_id, ATTR_TEMPERATURE: 22.0},
-        blocking=True,
-    )
+    with pytest.raises(ServiceValidationError, match="before changing its target"):
+        await hass.services.async_call(
+            CLIMATE_DOMAIN,
+            SERVICE_SET_TEMPERATURE,
+            {ATTR_ENTITY_ID: entity_id, ATTR_TEMPERATURE: 22.0},
+            blocking=True,
+        )
 
     assert posted_parameters(aioclient_mock) == []
 

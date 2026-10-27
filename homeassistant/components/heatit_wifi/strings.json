@@ -10,6 +10,9 @@
       "cannot_connect": "Could not connect to a Heatit WiFi device at that address."
     },
     "step": {
+      "discovery_confirm": {
+        "description": "Do you want to add {name}, discovered at {host}?"
+      },
       "reconfigure": {
         "data": {
           "host": "Host"
@@ -27,9 +30,6 @@
           "host": "The device's IP address or hostname on your local network, e.g. 192.168.1.50."
         },
         "description": "Enter the local IP address (or hostname) of your Heatit WiFi thermostat, panel or dimmer."
-      },
-      "zeroconf_confirm": {
-        "description": "Do you want to add {name}, discovered at {host}?"
       }
     }
   },
@@ -301,6 +301,9 @@
     },
     "set_parameter_failed": {
       "message": "Failed to set {parameter} to {value} on {device}."
+    },
+    "set_temperature_while_off": {
+      "message": "Turn on {device} before changing its target temperature."
     },
     "unsupported_value": {
       "message": "Unsupported {parameter} value: {value}."

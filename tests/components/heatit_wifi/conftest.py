@@ -68,7 +68,7 @@ THERMOSTAT_STATUS: dict[str, Any] = {
 # Real /api/status from a WiFi7 (firmware 0.1.16) in relay mode.
 RELAY_STATUS: dict[str, Any] = {
     "id": "relay123",
-    "name": "THERMOSTAT a0a08c",
+    "name": "Relay hall",
     "room": "",
     "state": "Off",
     "currentPower": 0,

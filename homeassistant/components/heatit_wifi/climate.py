@@ -14,7 +14,7 @@ from homeassistant.components.climate import (
 )
 from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import HeatitWiFiConfigEntry
@@ -160,16 +160,13 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set a new target temperature."""
         if self.hvac_mode == HVACMode.OFF:
-            _LOGGER.warning(
-                "Cannot set target temperature for %s while device is OFF",
-                self._device_name,
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="set_temperature_while_off",
+                translation_placeholders={"device": self._device_name},
             )
-            return
 
-        temperature = kwargs.get(ATTR_TEMPERATURE)
-        if temperature is None:
-            _LOGGER.error("No temperature provided to async_set_temperature")
-            return
+        temperature = kwargs[ATTR_TEMPERATURE]
 
         operating_mode = self._parameters().get("operatingMode")
         param = (
@@ -178,10 +175,14 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
             else None
         )
         if param is None:
-            _LOGGER.error(
-                "Cannot set temperature: unsupported operating mode %s", operating_mode
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="unsupported_value",
+                translation_placeholders={
+                    "parameter": "operatingMode",
+                    "value": str(operating_mode),
+                },
             )
-            return
 
         if not await self._api.set_parameters(**{param: temperature}):
             raise HomeAssistantError(
@@ -278,7 +279,7 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
             return HVACMode.HEAT
         if operating_mode == THERMOSTAT_MODE_COOL:
             return HVACMode.COOL
-        _LOGGER.error("Unknown operating mode from Heatit: %s", operating_mode)
+        _LOGGER.debug("Unknown operating mode from Heatit: %s", operating_mode)
         return None
 
     def _state_to_hvac_action(self, state: str | None) -> HVACAction | None:
@@ -291,7 +292,7 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
             return HVACAction.HEATING
         if normalized == "cooling":
             return HVACAction.COOLING
-        _LOGGER.error("Unknown state from Heatit: %s", state)
+        _LOGGER.debug("Unknown state from Heatit: %s", state)
         return None
 
 
@@ -386,23 +387,27 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set a new target temperature."""
         if self.hvac_mode == HVACMode.OFF:
-            _LOGGER.warning(
-                "Cannot set target temperature for %s while device is OFF",
-                self._device_name,
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="set_temperature_while_off",
+                translation_placeholders={"device": self._device_name},
             )
-            return
 
-        temperature = kwargs.get(ATTR_TEMPERATURE)
-        if temperature is None:
-            _LOGGER.error("No temperature provided to async_set_temperature")
-            return
+        temperature = kwargs[ATTR_TEMPERATURE]
 
         panel_mode = self._parameters().get("panelMode")
         param = (
             PANEL_SETPOINT_BY_MODE.get(panel_mode) if panel_mode is not None else None
         )
         if param is None:
-            return
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="unsupported_value",
+                translation_placeholders={
+                    "parameter": "panelMode",
+                    "value": str(panel_mode),
+                },
+            )
         if not await self._api.set_parameters(**{param: temperature}):
             raise HomeAssistantError(
                 translation_domain=DOMAIN,

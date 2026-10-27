@@ -12,12 +12,7 @@ rules:
     status: todo
     comment: needs a home-assistant/brands PR (icon + logo)
   common-modules: done
-  config-flow-test-coverage:
-    status: done
-    comment: >-
-      tests/components/heatit_wifi/test_config_flow.py covers user
-      (success/cannot_connect), zeroconf (discover/confirm/update-in-place),
-      and reconfigure (success/different_device) for all three device kinds
+  config-flow-test-coverage: done
   config-flow: done
   dependency-transparency:
     status: exempt
