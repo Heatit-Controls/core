@@ -223,14 +223,23 @@ async def test_user_flow_already_configured(
     assert result["reason"] == "already_configured"
 
 
+@pytest.mark.parametrize(
+    "status",
+    [
+        pytest.param(
+            {"id": "future123", "parameters": {"somethingNew": 1}}, id="unknown"
+        ),
+        pytest.param(
+            {"id": "plug123", "model": "WALL PLUG", "parameters": {"onOff": True}},
+            id="wall_plug",
+        ),
+    ],
+)
 async def test_user_flow_unrecognized_device_recovers(
-    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, status: dict[str, Any]
 ) -> None:
-    """An unknown product reports cannot_connect, and a retry can still succeed."""
-    aioclient_mock.get(
-        "http://192.168.1.70/api/status",
-        json={"id": "future123", "parameters": {"somethingNew": 1}},
-    )
+    """An unsupported product reports cannot_connect, and a retry can still succeed."""
+    aioclient_mock.get("http://192.168.1.70/api/status", json=status)
 
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}

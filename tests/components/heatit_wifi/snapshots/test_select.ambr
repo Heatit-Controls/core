@@ -252,9 +252,9 @@
     'capabilities': dict({
       <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
         'scene_controller',
-        's1_s2_load_and_scene',
         's1_load',
         's2_load',
+        's1_s2_load_and_scene',
       ]),
     }),
     'config_entry_id': <ANY>,
@@ -293,9 +293,9 @@
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Dimmer Switch functionality',
       <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
         'scene_controller',
-        's1_s2_load_and_scene',
         's1_load',
         's2_load',
+        's1_s2_load_and_scene',
       ]),
     }),
     'context': <ANY>,
@@ -303,7 +303,7 @@
     'last_changed': <ANY>,
     'last_reported': <ANY>,
     'last_updated': <ANY>,
-    'state': 's1_s2_load_and_scene',
+    'state': 's1_load',
   })
 # ---
 # name: test_entities[panel][select.panel_buttons-entry]

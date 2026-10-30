@@ -64,9 +64,9 @@ _DISPLAY_INFORMATION_OPTIONS = {
 _DISABLE_BUTTONS_OPTIONS = {0: "enabled", 1: "disabled", 2: "menu_locked"}
 _SWITCH_FUNCTIONALITY_OPTIONS = {
     0: "scene_controller",
-    1: "s1_s2_load_and_scene",
-    2: "s1_load",
-    3: "s2_load",
+    1: "s1_load",
+    2: "s2_load",
+    3: "s1_s2_load_and_scene",
 }
 _MULTIPRESS_OPTIONS = {
     0: "disabled",

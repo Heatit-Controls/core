@@ -11,8 +11,6 @@ _FINGERPRINT_PARAMETER: dict[str, DeviceKind] = {
     "dimLevel": DeviceKind.DIMMER,
     "panelMode": DeviceKind.PANEL,
     "operatingMode": DeviceKind.THERMOSTAT,
-    # A WiFi7 in relay mode reports no thermostat parameters at all.
-    "onOff": DeviceKind.THERMOSTAT,
 }
 
 
@@ -27,4 +25,8 @@ def detect_device_kind(status: dict[str, Any]) -> DeviceKind | None:
     for key, kind in _FINGERPRINT_PARAMETER.items():
         if key in parameters:
             return kind
+    # A WiFi7 in relay mode reports no thermostat parameters at all. Other
+    # products such as the Wall Plug also report onOff, so check the model.
+    if "onOff" in parameters and "WiFi7" in str(status.get("model", "")):
+        return DeviceKind.THERMOSTAT
     return None

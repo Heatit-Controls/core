@@ -37,9 +37,6 @@
     "binary_sensor": {
       "open_window_detected": {
         "name": "Open window detected"
-      },
-      "open_window_detection_enabled": {
-        "name": "Open window detection enabled"
       }
     },
     "button": {

@@ -9,7 +9,6 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
-from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -46,13 +45,6 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[HeatitWiFiBinarySensorDescription, ...] = (
         device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PANEL},
         device_class=BinarySensorDeviceClass.WINDOW,
         value_fn=_owd_field("activeNow"),
-    ),
-    HeatitWiFiBinarySensorDescription(
-        key="open_window_detection_enabled",
-        translation_key="open_window_detection_enabled",
-        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PANEL},
-        entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=_owd_field("openWindowDetection"),
     ),
 )
 
