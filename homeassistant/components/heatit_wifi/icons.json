@@ -24,11 +24,20 @@
       "automatic_turn_on": {
         "default": "mdi:timer-play"
       },
+      "load_limit": {
+        "default": "mdi:flash-alert"
+      },
       "power_regulator_active_time": {
         "default": "mdi:percent"
       },
+      "power_restore_level": {
+        "default": "mdi:power-plug-battery"
+      },
       "standby_display_brightness": {
         "default": "mdi:brightness-4"
+      },
+      "switch_on_level": {
+        "default": "mdi:brightness-percent"
       },
       "turn_off_delay": {
         "default": "mdi:timer-sand"
@@ -58,6 +67,9 @@
       },
       "external_sensor_fallback": {
         "default": "mdi:thermometer-alert"
+      },
+      "led_behavior": {
+        "default": "mdi:led-on"
       },
       "regulation_mode": {
         "default": "mdi:sine-wave"

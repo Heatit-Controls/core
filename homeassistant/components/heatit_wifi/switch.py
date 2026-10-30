@@ -4,7 +4,11 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, override
 
-from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
+from homeassistant.components.switch import (
+    SwitchDeviceClass,
+    SwitchEntity,
+    SwitchEntityDescription,
+)
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
@@ -63,11 +67,19 @@ def _set_owd_local(status: dict[str, Any], value: Any) -> None:
 
 
 SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
-    # WiFi7 relay mode and the Wall Plug: the relay is the main entity.
+    # WiFi7 relay mode and the Smart Plug: the relay is the main entity.
     HeatitWiFiSwitchDescription(
         key="relay",
         name=None,
-        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PLUG},
+        device_kinds={DeviceKind.THERMOSTAT},
+        parameter="onOff",
+        entity_category=None,
+    ),
+    HeatitWiFiSwitchDescription(
+        key="relay",
+        name=None,
+        device_kinds={DeviceKind.PLUG},
+        device_class=SwitchDeviceClass.OUTLET,
         parameter="onOff",
         entity_category=None,
     ),
@@ -78,7 +90,7 @@ SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
         parameter="invertedOutput",
         entity_registry_enabled_default=False,
     ),
-    # Wall Plug
+    # Smart Plug
     HeatitWiFiSwitchDescription(
         key="button_enabled",
         translation_key="button_enabled",
@@ -227,3 +239,4 @@ class HeatitWiFiSwitch(HeatitWiFiEntity, SwitchEntity):
             else:
                 data.setdefault("parameters", {})[description.parameter] = payload
             self.coordinator.async_set_updated_data(data)
+            await self.coordinator.async_request_refresh()

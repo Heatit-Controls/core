@@ -130,6 +130,7 @@ WIFI6_STATUS: dict[str, Any] = {
         "floorMinimumTemperatureLimit": 5.0,
         "floorMaximumTemperatureLimit": 27.0,
         "temperatureControlHysteresis": 0.5,
+        "standbyDisplayBrightness": 50,
         "sensorValue": 0,
         "floorCalibration": 0.0,
     },
@@ -159,6 +160,10 @@ PANEL_STATUS: dict[str, Any] = {
         "temperatureDisplay": False,
         "sensorMode": False,
         "disableButtons": 0,
+        "activeDisplayBrightness": 10,
+        "standbyDisplayBrightness": 5,
+        "loadLimit": 8,
+        "maxLoad": 8,
         "OWD": {"openWindowDetection": False, "activeNow": False, "activeTime": 0},
     },
     "network": {
@@ -189,6 +194,12 @@ DIMMER_STATUS: dict[str, Any] = {
         "onOffFunctionality": False,
         "alwaysOn": False,
         "disableEnableAutocalibration": True,
+        "dimmingDuration": 1.0,
+        "automaticTurnOff": 0,
+        "automaticTurnOn": 0,
+        "turnOffDelayTime": 0,
+        "switchOnLevel": 0,
+        "powerRestoreLevel": 101,
     },
     "network": {
         "mac": "aa:bb:cc:77:88:99",
@@ -197,13 +208,15 @@ DIMMER_STATUS: dict[str, Any] = {
     },
 }
 
-# Wall Plug, which has no published spec; parameter set from fw 0.1.11.
+# Smart Plug on fw 0.1.11, which still reports the old "WALL PLUG" model.
 PLUG_STATUS: dict[str, Any] = {
     "id": "plug123",
     "name": "Wall plug",
     "model": "WALL PLUG",
     "firmware": "0.1.11",
     "state": "Off",
+    "currentPower": 150,
+    "totalConsumption": 580.08,
     "parameters": {
         "onOff": False,
         "buttonEnabled": True,

@@ -25,7 +25,7 @@ def detect_device_kind(status: dict[str, Any]) -> DeviceKind | None:
     for key, kind in _FINGERPRINT_PARAMETER.items():
         if key in parameters:
             return kind
-    # A WiFi7 in relay mode and the Wall Plug both report only onOff-style
+    # A WiFi7 in relay mode and the Smart Plug both report only onOff-style
     # relay parameters, so only the model tells them apart.
     if "onOff" in parameters:
         if is_wifi7(status):

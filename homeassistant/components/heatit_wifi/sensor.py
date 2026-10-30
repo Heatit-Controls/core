@@ -63,7 +63,12 @@ SENSOR_DESCRIPTIONS: tuple[HeatitWiFiSensorDescription, ...] = (
     HeatitWiFiSensorDescription(
         key="power",
         translation_key="power",
-        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PANEL, DeviceKind.DIMMER},
+        device_kinds={
+            DeviceKind.THERMOSTAT,
+            DeviceKind.PANEL,
+            DeviceKind.DIMMER,
+            DeviceKind.PLUG,
+        },
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfPower.WATT,
@@ -72,7 +77,12 @@ SENSOR_DESCRIPTIONS: tuple[HeatitWiFiSensorDescription, ...] = (
     HeatitWiFiSensorDescription(
         key="energy",
         translation_key="energy",
-        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PANEL, DeviceKind.DIMMER},
+        device_kinds={
+            DeviceKind.THERMOSTAT,
+            DeviceKind.PANEL,
+            DeviceKind.DIMMER,
+            DeviceKind.PLUG,
+        },
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,

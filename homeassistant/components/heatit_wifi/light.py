@@ -79,7 +79,7 @@ class HeatitWiFiDimmer(HeatitWiFiEntity, LightEntity):
                     "device": self._device_name,
                 },
             )
-        self._apply_local(parameters)
+        await self._async_apply_local(parameters)
 
     @override
     async def async_turn_off(self, **kwargs: Any) -> None:
@@ -94,14 +94,13 @@ class HeatitWiFiDimmer(HeatitWiFiEntity, LightEntity):
                     "device": self._device_name,
                 },
             )
-        self._apply_local({"dimmerState": False})
+        await self._async_apply_local({"dimmerState": False})
 
-    def _apply_local(self, parameters: dict[str, Any]) -> None:
+    async def _async_apply_local(self, parameters: dict[str, Any]) -> None:
         """Apply freshly written parameters to the shared status cache.
 
-        Deliberately no immediate readback: /api/status can still report
-        the old value right after a write, which would revert the UI; the
-        next scheduled poll confirms the change instead.
+        The read-back is delayed (see REFRESH_AFTER_WRITE_DELAY), since
+        /api/status can still report the old value right after a write.
         """
         data = self.coordinator.data
         if not data:
@@ -110,3 +109,4 @@ class HeatitWiFiDimmer(HeatitWiFiEntity, LightEntity):
             data["state"] = parameters["dimmerState"]
         data.setdefault("parameters", {}).update(parameters)
         self.coordinator.async_set_updated_data(data)
+        await self.coordinator.async_request_refresh()

@@ -127,3 +127,59 @@ async def test_relay_mode_switch_swaps_entities(
     assert not init_integration.runtime_data.relay_mode
     assert hass.states.get("climate.thermostat")
     assert not entity_registry.async_get("switch.thermostat")
+
+
+@pytest.mark.parametrize("device_kind", ["plug"])
+@pytest.mark.parametrize("platforms", [[Platform.SWITCH]])
+async def test_entry_follows_detected_device_kind(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    mock_config_entry: MockConfigEntry,
+    platforms: list[Platform],
+) -> None:
+    """A Smart Plug once stored as a thermostat is set up as a plug."""
+    entry = MockConfigEntry(
+        domain=mock_config_entry.domain,
+        unique_id=mock_config_entry.unique_id,
+        title=mock_config_entry.title,
+        data={**mock_config_entry.data, "device_kind": "thermostat"},
+    )
+    entry.add_to_hass(hass)
+    mock_status(aioclient_mock, HOST_BY_KIND["plug"], STATUS_BY_KIND["plug"])
+
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    assert entry.data["device_kind"] == "plug"
+    assert entry.runtime_data.device_kind == "plug"
+    state = hass.states.get("switch.wall_plug")
+    assert state
+    assert state.attributes["device_class"] == "outlet"
+
+
+@pytest.mark.parametrize("platforms", [[Platform.SWITCH]])
+async def test_refresh_after_write(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    freezer: FrozenDateTimeFactory,
+    init_integration: MockConfigEntry,
+) -> None:
+    """A write is read back after a short delay, not immediately."""
+    aioclient_mock.mock_calls.clear()
+    await hass.services.async_call(
+        "switch",
+        "turn_on",
+        {"entity_id": "switch.thermostat_open_window_detection"},
+        blocking=True,
+    )
+
+    def status_reads() -> int:
+        return sum(1 for method, *_ in aioclient_mock.mock_calls if method == "GET")
+
+    assert status_reads() == 0
+
+    freezer.tick(timedelta(seconds=5))
+    async_fire_time_changed(hass)
+    await hass.async_block_till_done()
+
+    assert status_reads() == 1

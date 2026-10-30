@@ -6,7 +6,7 @@ from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, Device
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from . import HeatitWiFiCoordinator, HeatitWiFiData
-from .const import DOMAIN, FALLBACK_MODEL_BY_KIND, DeviceKind
+from .const import DOMAIN, FALLBACK_MODEL_BY_KIND
 
 
 class HeatitWiFiEntity(CoordinatorEntity[HeatitWiFiCoordinator]):
@@ -64,10 +64,7 @@ def reports_parameter(data: HeatitWiFiData, parameter: str) -> bool:
     """Return whether an entity backed by a parameter applies to this device.
 
     A WiFi7 reports a different parameter set in thermostat and relay mode,
-    and WiFi6 firmware reports fewer than WiFi7, so thermostat entities
-    follow what the device actually reports, as do the Wall Plug's, which
-    have no published spec. Panel and WM Dimmer have a single fixed set.
+    WiFi6 firmware reports fewer than WiFi7, and firmware versions of the
+    other products differ too, so entities follow what the device reports.
     """
-    if data.device_kind not in (DeviceKind.THERMOSTAT, DeviceKind.PLUG):
-        return True
     return parameter in (data.coordinator.data.get("parameters") or {})

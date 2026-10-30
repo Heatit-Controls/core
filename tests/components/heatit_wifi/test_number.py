@@ -66,6 +66,20 @@ async def test_entities(
             id="panel_query_string",
         ),
         pytest.param(
+            "panel",
+            "number.panel_active_display_brightness",
+            70,
+            {"activeDisplayBrightness": "7"},
+            id="panel_coded_brightness",
+        ),
+        pytest.param(
+            "thermostat",
+            "number.thermostat_eco_setpoint",
+            17.5,
+            {"ecoSetpoint": 17.5},
+            id="thermostat_eco_setpoint",
+        ),
+        pytest.param(
             "dimmer",
             "number.dimmer_minimum_dim_level",
             20,
@@ -114,3 +128,48 @@ async def test_set_value_failure(
         )
 
     assert hass.states.get(entity_id) == before
+
+
+@pytest.mark.usefixtures("entity_registry_enabled_by_default", "init_integration")
+async def test_action_after_error_skips_invalid_range(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """Delays of 1-9 s, which the device rejects, are sent as 0 (stay off)."""
+    await hass.services.async_call(
+        NUMBER_DOMAIN,
+        SERVICE_SET_VALUE,
+        {
+            ATTR_ENTITY_ID: "number.thermostat_retry_after_overload_or_overheat",
+            ATTR_VALUE: 5,
+        },
+        blocking=True,
+    )
+
+    assert posted_parameters(aioclient_mock) == [{"actionAfterError": 0}]
+
+
+@pytest.mark.parametrize(
+    ("device_kind", "entity_id", "expected_min", "expected_max"),
+    [
+        pytest.param(
+            "wifi6", "number.wifi6_standby_display_brightness", 1, 100, id="wifi6"
+        ),
+        pytest.param(
+            "thermostat",
+            "number.thermostat_standby_display_brightness",
+            0,
+            100,
+            id="wifi7",
+        ),
+        pytest.param("panel", "number.panel_load_limit", 1, 8, id="panel_max_load"),
+    ],
+)
+@pytest.mark.usefixtures("entity_registry_enabled_by_default", "init_integration")
+async def test_device_specific_limits(
+    hass: HomeAssistant, entity_id: str, expected_min: float, expected_max: float
+) -> None:
+    """Limits follow the model and the bounds the device reports."""
+    state = hass.states.get(entity_id)
+    assert state
+    assert state.attributes["min"] == expected_min
+    assert state.attributes["max"] == expected_max

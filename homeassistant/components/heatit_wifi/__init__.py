@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import HeatitWiFiAPI
@@ -17,10 +18,12 @@ from .const import (
     CONF_DEVICE_KIND,
     DOMAIN,
     PLATFORMS_BY_KIND,
+    REFRESH_AFTER_WRITE_DELAY,
     RELAY_SENSOR_MODE,
     SCAN_INTERVAL,
     DeviceKind,
 )
+from .device import detect_device_kind
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -79,9 +82,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: HeatitWiFiConfigEntry) -
         name=DOMAIN,
         update_method=async_update_data,
         update_interval=SCAN_INTERVAL,
+        # Writes request a refresh; delay it so the device has applied the
+        # change before it is read back.
+        request_refresh_debouncer=Debouncer(
+            hass, _LOGGER, cooldown=REFRESH_AFTER_WRITE_DELAY, immediate=False
+        ),
     )
 
     await coordinator.async_config_entry_first_refresh()
+
+    # Entries made before a product was recognized on its own (e.g. a Smart
+    # Plug once set up as a thermostat) follow what the device reports.
+    detected_kind = detect_device_kind(coordinator.data)
+    if detected_kind is not None and detected_kind != device_kind:
+        _LOGGER.debug("Device kind of %s changed to %s", host, detected_kind)
+        device_kind = api.device_kind = detected_kind
+        hass.config_entries.async_update_entry(
+            entry, data={**entry.data, CONF_DEVICE_KIND: detected_kind}
+        )
 
     entry.runtime_data = HeatitWiFiData(
         coordinator=coordinator,

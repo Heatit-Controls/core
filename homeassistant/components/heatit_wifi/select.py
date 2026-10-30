@@ -75,6 +75,7 @@ _DISPLAY_INFORMATION_OPTIONS = {
     5: "floor_temperature",
 }
 _DISABLE_BUTTONS_OPTIONS = {0: "enabled", 1: "disabled", 2: "menu_locked"}
+_LED_BEHAVIOR_OPTIONS = {0: "disabled", 1: "indicate_change", 2: "follow_relay"}
 _SWITCH_FUNCTIONALITY_OPTIONS = {
     0: "scene_controller",
     1: "s1_load",
@@ -203,6 +204,12 @@ SELECT_DESCRIPTIONS: tuple[HeatitWiFiSelectDescription, ...] = (
         exists_fn=is_wifi7,
     ),
     _describe(
+        "led_behavior",
+        {DeviceKind.PLUG},
+        "ledBehavior",
+        _LED_BEHAVIOR_OPTIONS,
+    ),
+    _describe(
         "switch_functionality",
         {DeviceKind.DIMMER},
         "switchFunctionality",
@@ -319,3 +326,4 @@ class HeatitWiFiSelect(HeatitWiFiEntity, SelectEntity):
         if data := self.coordinator.data:
             data.setdefault("parameters", {})[parameter] = value
             self.coordinator.async_set_updated_data(data)
+            await self.coordinator.async_request_refresh()

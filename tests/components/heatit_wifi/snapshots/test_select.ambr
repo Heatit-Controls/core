@@ -367,6 +367,67 @@
     'state': 'enabled',
   })
 # ---
+# name: test_entities[plug][select.wall_plug_led_behavior-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'disabled',
+        'indicate_change',
+        'follow_relay',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': <ANY>,
+    'device_class': None,
+    'device_id': <ANY>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.wall_plug_led_behavior',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'LED behavior',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'LED behavior',
+    'platform': 'heatit_wifi',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'led_behavior',
+    'unique_id': 'plug123-led_behavior',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[plug][select.wall_plug_led_behavior-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Wall plug LED behavior',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'disabled',
+        'indicate_change',
+        'follow_relay',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.wall_plug_led_behavior',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'disabled',
+  })
+# ---
 # name: test_entities[plug][select.wall_plug_state_after_power_loss-entry]
   EntityRegistryEntrySnapshot({
     'aliases': list([

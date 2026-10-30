@@ -12,7 +12,11 @@ CONF_DEVICE_KIND: Final = "device_kind"
 
 # Local REST API answers a single GET; safe to poll often without
 # bothering the device.
-SCAN_INTERVAL: Final = timedelta(seconds=60)
+SCAN_INTERVAL: Final = timedelta(seconds=30)
+
+# Seconds to wait after a write before reading the status back, since the
+# device can still report the old value right after a write.
+REFRESH_AFTER_WRITE_DELAY: Final = 5
 
 # WiFi7 sensorMode that turns the thermostat into a plain relay ("RELA"),
 # with its own parameter set and no thermostat functions.
@@ -39,7 +43,7 @@ class DeviceKind(StrEnum):
     THERMOSTAT = "thermostat"  # WiFi6 and WiFi7
     PANEL = "panel"
     DIMMER = "dimmer"  # WM Dimmer
-    PLUG = "plug"  # Wall Plug
+    PLUG = "plug"  # WiFi Smart Plug (formerly Wall Plug)
 
 
 # WiFi6 thermostats predate the "model" field; fall back to a plain label
@@ -48,7 +52,7 @@ FALLBACK_MODEL_BY_KIND: Final[dict[str, str]] = {
     DeviceKind.THERMOSTAT: "WiFi6 Thermostat",
     DeviceKind.PANEL: "WiFi Panel",
     DeviceKind.DIMMER: "WM Dimmer",
-    DeviceKind.PLUG: "Wall Plug",
+    DeviceKind.PLUG: "WiFi Smart Plug",
 }
 
 # parameters written as JSON body vs. as query-string args on POST
@@ -86,6 +90,7 @@ PLATFORMS_BY_KIND: Final[dict[DeviceKind, list[Platform]]] = {
         Platform.SWITCH,
     ],
     DeviceKind.PLUG: [
+        Platform.BUTTON,
         Platform.NUMBER,
         Platform.SELECT,
         Platform.SENSOR,

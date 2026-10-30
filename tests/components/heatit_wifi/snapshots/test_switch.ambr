@@ -324,7 +324,7 @@
     'object_id_base': None,
     'options': dict({
     }),
-    'original_device_class': None,
+    'original_device_class': <SwitchDeviceClass.OUTLET: 'outlet'>,
     'original_icon': None,
     'original_name': None,
     'platform': 'heatit_wifi',
@@ -339,6 +339,7 @@
 # name: test_entities[plug][switch.wall_plug-state]
   StateSnapshot({
     'attributes': ReadOnlyDict({
+      <EntityStateAttribute.DEVICE_CLASS: 'device_class'>: 'outlet',
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Wall plug',
     }),
     'context': <ANY>,

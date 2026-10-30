@@ -194,7 +194,7 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
                     "device": self._device_name,
                 },
             )
-        self._apply_local(param, temperature)
+        await self._async_apply_local(param, temperature)
 
     @override
     async def async_set_preset_mode(self, preset_mode: str) -> None:
@@ -222,7 +222,7 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
                     "device": self._device_name,
                 },
             )
-        self._apply_local("operatingMode", operating_mode)
+        await self._async_apply_local("operatingMode", operating_mode)
 
     @override
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
@@ -247,18 +247,18 @@ class HeatitWiFiThermostat(HeatitWiFiEntity, ClimateEntity):
                     "device": self._device_name,
                 },
             )
-        self._apply_local("operatingMode", operating_mode)
+        await self._async_apply_local("operatingMode", operating_mode)
 
-    def _apply_local(self, parameter: str, value: Any) -> None:
+    async def _async_apply_local(self, parameter: str, value: Any) -> None:
         """Apply a freshly written parameter to the shared status cache.
 
-        Deliberately no immediate readback: /api/status can still report
-        the old value right after a write, which would revert the UI; the
-        next scheduled poll confirms the change instead.
+        The read-back is delayed (see REFRESH_AFTER_WRITE_DELAY), since
+        /api/status can still report the old value right after a write.
         """
         if data := self.coordinator.data:
             data.setdefault("parameters", {})[parameter] = value
             self.coordinator.async_set_updated_data(data)
+            await self.coordinator.async_request_refresh()
 
     @staticmethod
     def _hvac_mode_to_operatingmode(mode: HVACMode) -> int | None:
@@ -418,7 +418,7 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
                     "device": self._device_name,
                 },
             )
-        self._apply_local(param, temperature)
+        await self._async_apply_local(param, temperature)
 
     @override
     async def async_set_preset_mode(self, preset_mode: str) -> None:
@@ -446,7 +446,7 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
                     "device": self._device_name,
                 },
             )
-        self._apply_local("panelMode", panel_mode)
+        await self._async_apply_local("panelMode", panel_mode)
 
     @override
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
@@ -462,10 +462,11 @@ class HeatitWiFiPanel(HeatitWiFiEntity, ClimateEntity):
                     "device": self._device_name,
                 },
             )
-        self._apply_local("panelMode", panel_mode)
+        await self._async_apply_local("panelMode", panel_mode)
 
-    def _apply_local(self, parameter: str, value: Any) -> None:
+    async def _async_apply_local(self, parameter: str, value: Any) -> None:
         """Apply a freshly written parameter to the shared status cache."""
         if data := self.coordinator.data:
             data.setdefault("parameters", {})[parameter] = value
             self.coordinator.async_set_updated_data(data)
+            await self.coordinator.async_request_refresh()

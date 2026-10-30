@@ -99,6 +99,9 @@
       "internal_sensor_calibration": {
         "name": "Internal sensor calibration"
       },
+      "load_limit": {
+        "name": "Load limit"
+      },
       "maximum_dim_level": {
         "name": "Maximum dim level"
       },
@@ -114,6 +117,9 @@
       "power_regulator_active_time": {
         "name": "Power regulator active time"
       },
+      "power_restore_level": {
+        "name": "Level after power loss"
+      },
       "sensor_calibration": {
         "name": "Sensor calibration"
       },
@@ -122,6 +128,9 @@
       },
       "standby_display_brightness": {
         "name": "Standby display brightness"
+      },
+      "switch_on_level": {
+        "name": "Switch-on level"
       },
       "turn_off_delay": {
         "name": "Turn off delay"
@@ -197,6 +206,14 @@
           "internal_with_floor_limit": "[%key:component::heatit_wifi::entity::select::sensor_mode::state::internal_with_floor_limit%]",
           "off": "[%key:common::state::off%]",
           "power_regulator": "[%key:component::heatit_wifi::entity::select::sensor_mode::state::power_regulator%]"
+        }
+      },
+      "led_behavior": {
+        "name": "LED behavior",
+        "state": {
+          "disabled": "Disabled",
+          "follow_relay": "Follow relay state",
+          "indicate_change": "Indicate changes"
         }
       },
       "regulation_mode": {

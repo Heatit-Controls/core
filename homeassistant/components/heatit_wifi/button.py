@@ -19,8 +19,8 @@ from .entity import HeatitWiFiEntity
 PARALLEL_UPDATES = 1
 
 
-# WiFi7 and the Panel name the confirmation parameter after the reset and
-# expect "Reset"; WiFi6 and the WM Dimmer expect reset=reset for all three.
+# WiFi7, the Panel and the Smart Plug name the confirmation parameter after
+# the reset and expect "Reset"; WiFi6 and the WM Dimmer expect reset=reset.
 _NAMED_RESET_PARAMETERS = {
     "factory": "reset",
     "settings": "resetSettings",
@@ -108,7 +108,7 @@ class HeatitWiFiResetButton(HeatitWiFiEntity, ButtonEntity):
     async def async_press(self) -> None:
         """Send the reset command to the device."""
         reset_type = self.entity_description.reset_type
-        if self._device_kind == DeviceKind.PANEL or is_wifi7(
+        if self._device_kind in (DeviceKind.PANEL, DeviceKind.PLUG) or is_wifi7(
             self.coordinator.data or {}
         ):
             result = await self._api.reset_device(

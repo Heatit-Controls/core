@@ -22,7 +22,7 @@ def platforms() -> list[Platform]:
 
 
 @pytest.mark.parametrize(
-    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer"]
+    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer", "plug"]
 )
 @pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_entities(
@@ -67,6 +67,13 @@ async def test_entities(
             id="panel_settings",
         ),
         pytest.param(
+            "plug",
+            "reset_energy_meter",
+            "kwh",
+            {"resetKwh": "Reset"},
+            id="plug_kwh",
+        ),
+        pytest.param(
             "wifi6",
             "reset_settings_to_defaults",
             "settings",
@@ -92,7 +99,7 @@ async def test_press(
     expected_query: dict[str, str],
 ) -> None:
     """Pressing a button sends the product's reset with its guard parameter."""
-    entity_id = f"button.{NAME_BY_KIND[device_kind].lower()}_{button}"
+    entity_id = f"button.{NAME_BY_KIND[device_kind].lower().replace(' ', '_')}_{button}"
     await hass.services.async_call(
         BUTTON_DOMAIN, SERVICE_PRESS, {ATTR_ENTITY_ID: entity_id}, blocking=True
     )

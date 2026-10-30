@@ -24,6 +24,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
 from .const import DOMAIN, DeviceKind
+from .device import is_wifi7
 from .entity import HeatitWiFiEntity, reports_parameter
 
 # Serialize writes to the single physical device.
@@ -36,6 +37,14 @@ class HeatitWiFiNumberDescription(NumberEntityDescription):
 
     device_kinds: set[DeviceKind]
     parameter: str
+    # Displayed value = raw device value * scale, for coded values such as
+    # brightness 1-10 meaning 10-100 %.
+    scale: int = 1
+    # Status parameter holding the device's own upper bound, if any.
+    max_parameter: str | None = None
+    # Lower bound on thermostats other than the WiFi7.
+    non_wifi7_min_value: float | None = None
+    payload_fn: Callable[[float], float] | None = None
     entity_category: EntityCategory | None = EntityCategory.CONFIG
     mode: NumberMode = NumberMode.BOX
     entity_registry_enabled_default: bool = True
@@ -83,12 +92,22 @@ def _calibration(
     )
 
 
-def _brightness(key: str, parameter: str, minimum: int) -> HeatitWiFiNumberDescription:
+def _brightness(
+    key: str,
+    device_kinds: set[DeviceKind],
+    parameter: str,
+    minimum: int,
+    *,
+    scale: int = 1,
+    non_wifi7_min_value: float | None = None,
+) -> HeatitWiFiNumberDescription:
     return HeatitWiFiNumberDescription(
         key=key,
         translation_key=key,
-        device_kinds={DeviceKind.THERMOSTAT},
+        device_kinds=device_kinds,
         parameter=parameter,
+        scale=scale,
+        non_wifi7_min_value=non_wifi7_min_value,
         entity_registry_enabled_default=False,
         native_unit_of_measurement=PERCENTAGE,
         native_min_value=minimum,
@@ -98,13 +117,26 @@ def _brightness(key: str, parameter: str, minimum: int) -> HeatitWiFiNumberDescr
     )
 
 
-def _seconds(key: str, parameter: str, maximum: int) -> HeatitWiFiNumberDescription:
+def _action_after_error_payload(value: float) -> float:
+    # The device takes 0 (stay off) or 10-65535 s; 1-9 s mean "stay off".
+    return 0 if value < 10 else int(value)
+
+
+def _seconds(
+    key: str,
+    parameter: str,
+    maximum: int,
+    device_kinds: set[DeviceKind] | None = None,
+    *,
+    payload_fn: Callable[[float], float] | None = None,
+) -> HeatitWiFiNumberDescription:
     return HeatitWiFiNumberDescription(
         key=key,
         translation_key=key,
-        # The Wall Plug shares the WiFi7 relay mode's timing parameters.
-        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PLUG},
+        # The Smart Plug shares the WiFi7 relay mode's timing parameters.
+        device_kinds=device_kinds or {DeviceKind.THERMOSTAT, DeviceKind.PLUG},
         parameter=parameter,
+        payload_fn=payload_fn,
         entity_registry_enabled_default=False,
         device_class=NumberDeviceClass.DURATION,
         native_unit_of_measurement=UnitOfTime.SECONDS,
@@ -191,9 +223,25 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         native_unit_of_measurement=PERCENTAGE,
         entity_registry_enabled_default=False,
     ),
-    _brightness("active_display_brightness", "activeDisplayBrightness", 10),
-    _brightness("standby_display_brightness", "standbyDisplayBrightness", 0),
-    _seconds("action_after_error", "actionAfterError", 65535),
+    _brightness(
+        "active_display_brightness",
+        {DeviceKind.THERMOSTAT},
+        "activeDisplayBrightness",
+        10,
+    ),
+    _brightness(
+        "standby_display_brightness",
+        {DeviceKind.THERMOSTAT},
+        "standbyDisplayBrightness",
+        0,
+        non_wifi7_min_value=1,
+    ),
+    _seconds(
+        "action_after_error",
+        "actionAfterError",
+        65535,
+        payload_fn=_action_after_error_payload,
+    ),
     HeatitWiFiNumberDescription(
         key="size_of_load",
         translation_key="size_of_load",
@@ -206,15 +254,30 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         native_unit_of_measurement=UnitOfPower.WATT,
         entity_registry_enabled_default=False,
     ),
-    # Relay mode only
-    _seconds("automatic_turn_off", "automaticTurnOff", 86400),
-    _seconds("automatic_turn_on", "automaticTurnOn", 86400),
-    _seconds("turn_off_delay", "turnOffDelayTime", 60),
+    # WiFi7 relay mode, Smart Plug and WM Dimmer
+    _seconds(
+        "automatic_turn_off",
+        "automaticTurnOff",
+        86400,
+        {DeviceKind.THERMOSTAT, DeviceKind.PLUG, DeviceKind.DIMMER},
+    ),
+    _seconds(
+        "automatic_turn_on",
+        "automaticTurnOn",
+        86400,
+        {DeviceKind.THERMOSTAT, DeviceKind.PLUG, DeviceKind.DIMMER},
+    ),
+    _seconds(
+        "turn_off_delay",
+        "turnOffDelayTime",
+        60,
+        {DeviceKind.THERMOSTAT, DeviceKind.PLUG, DeviceKind.DIMMER},
+    ),
     # Panel — parameter names from Heatit's WiFi Panel OpenAPI spec.
     HeatitWiFiNumberDescription(
         key="eco_setpoint",
         translation_key="eco_setpoint",
-        device_kinds={DeviceKind.PANEL},
+        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PANEL},
         parameter="ecoSetpoint",
         native_min_value=5,
         native_max_value=40,
@@ -244,6 +307,32 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         entity_registry_enabled_default=False,
     ),
+    # The Panel encodes brightness as 1-10 (x10 %).
+    _brightness(
+        "active_display_brightness",
+        {DeviceKind.PANEL},
+        "activeDisplayBrightness",
+        10,
+        scale=10,
+    ),
+    _brightness(
+        "standby_display_brightness",
+        {DeviceKind.PANEL},
+        "standbyDisplayBrightness",
+        0,
+        scale=10,
+    ),
+    HeatitWiFiNumberDescription(
+        key="load_limit",
+        translation_key="load_limit",
+        device_kinds={DeviceKind.PANEL},
+        parameter="loadLimit",
+        max_parameter="maxLoad",
+        native_min_value=1,
+        native_max_value=15,
+        native_step=1,
+        entity_registry_enabled_default=False,
+    ),
     # WM Dimmer — parameter names from Heatit's WM Dimmer OpenAPI spec.
     HeatitWiFiNumberDescription(
         key="minimum_dim_level",
@@ -253,7 +342,7 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         native_min_value=1,
         native_max_value=98,
         native_step=1,
-        native_unit_of_measurement="%",
+        native_unit_of_measurement=PERCENTAGE,
     ),
     HeatitWiFiNumberDescription(
         key="maximum_dim_level",
@@ -263,7 +352,29 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         native_min_value=2,
         native_max_value=99,
         native_step=1,
-        native_unit_of_measurement="%",
+        native_unit_of_measurement=PERCENTAGE,
+    ),
+    HeatitWiFiNumberDescription(
+        key="switch_on_level",
+        translation_key="switch_on_level",
+        device_kinds={DeviceKind.DIMMER},
+        parameter="switchOnLevel",
+        native_min_value=0,
+        native_max_value=99,
+        native_step=1,
+        native_unit_of_measurement=PERCENTAGE,
+        entity_registry_enabled_default=False,
+    ),
+    # 101 restores the level the dimmer had before the power loss.
+    HeatitWiFiNumberDescription(
+        key="power_restore_level",
+        translation_key="power_restore_level",
+        device_kinds={DeviceKind.DIMMER},
+        parameter="powerRestoreLevel",
+        native_min_value=0,
+        native_max_value=101,
+        native_step=1,
+        entity_registry_enabled_default=False,
     ),
     HeatitWiFiNumberDescription(
         key="dimming_duration",
@@ -273,17 +384,6 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         native_min_value=0.0,
         native_max_value=10.0,
         native_step=0.1,
-        native_unit_of_measurement=UnitOfTime.SECONDS,
-        entity_registry_enabled_default=False,
-    ),
-    HeatitWiFiNumberDescription(
-        key="automatic_turn_off",
-        translation_key="automatic_turn_off",
-        device_kinds={DeviceKind.DIMMER},
-        parameter="automaticTurnOff",
-        native_min_value=0,
-        native_max_value=86400,
-        native_step=1,
         native_unit_of_measurement=UnitOfTime.SECONDS,
         entity_registry_enabled_default=False,
     ),
@@ -333,21 +433,45 @@ class HeatitWiFiNumber(HeatitWiFiEntity, NumberEntity):
         )
         self._api = api
         self.entity_description = description
+        if description.non_wifi7_min_value is not None and not is_wifi7(
+            coordinator.data or {}
+        ):
+            self._attr_native_min_value = description.non_wifi7_min_value
 
     @property
     @override
     def native_value(self) -> float | None:
         """Return the parameter's current value."""
-        return _parameter_field(self.entity_description.parameter)(
+        value = _parameter_field(self.entity_description.parameter)(
             self.coordinator.data or {}
         )
+        return None if value is None else value * self.entity_description.scale
+
+    @property
+    @override
+    def native_max_value(self) -> float:
+        """Return the device's own upper bound when it reports one."""
+        data = self.coordinator.data or {}
+        if (max_parameter := self.entity_description.max_parameter) and (
+            maximum := _parameter_field(max_parameter)(data) or data.get(max_parameter)
+        ):
+            return float(maximum)
+        return super().native_max_value
 
     @override
     async def async_set_native_value(self, value: float) -> None:
         """Write a new value for the parameter."""
-        parameter = self.entity_description.parameter
-        step = self.entity_description.native_step
-        payload = int(value) if step is not None and step >= 1 else round(value, 1)
+        description = self.entity_description
+        parameter = description.parameter
+        step = description.native_step
+        if description.payload_fn is not None:
+            payload = description.payload_fn(value)
+        elif description.scale != 1:
+            payload = round(value / description.scale)
+        elif step is not None and step >= 1:
+            payload = int(value)
+        else:
+            payload = round(value, 1)
         if not await self._api.set_parameters(**{parameter: payload}):
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
@@ -361,3 +485,4 @@ class HeatitWiFiNumber(HeatitWiFiEntity, NumberEntity):
         if data := self.coordinator.data:
             data.setdefault("parameters", {})[parameter] = payload
             self.coordinator.async_set_updated_data(data)
+            await self.coordinator.async_request_refresh()
