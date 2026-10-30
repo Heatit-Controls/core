@@ -40,6 +40,9 @@ class HeatitWiFiNumberDescription(NumberEntityDescription):
     # Displayed value = raw device value * scale, for coded values such as
     # brightness 1-10 meaning 10-100 %.
     scale: int = 1
+    # Replaces scale on thermostats other than the WiFi7, whose firmware
+    # stores some values coded where the WiFi7 uses real units.
+    non_wifi7_scale: int | None = None
     # Status parameter holding the device's own upper bound, if any.
     max_parameter: str | None = None
     # Lower bound on thermostats other than the WiFi7.
@@ -99,6 +102,7 @@ def _brightness(
     minimum: int,
     *,
     scale: int = 1,
+    non_wifi7_scale: int | None = None,
     non_wifi7_min_value: float | None = None,
 ) -> HeatitWiFiNumberDescription:
     return HeatitWiFiNumberDescription(
@@ -107,6 +111,7 @@ def _brightness(
         device_kinds=device_kinds,
         parameter=parameter,
         scale=scale,
+        non_wifi7_scale=non_wifi7_scale,
         non_wifi7_min_value=non_wifi7_min_value,
         entity_registry_enabled_default=False,
         native_unit_of_measurement=PERCENTAGE,
@@ -217,6 +222,7 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         translation_key="power_regulator_active_time",
         device_kinds={DeviceKind.THERMOSTAT},
         parameter="powerRegulatorActiveTime",
+        non_wifi7_scale=10,
         native_min_value=10,
         native_max_value=100,
         native_step=1,
@@ -228,13 +234,15 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         {DeviceKind.THERMOSTAT},
         "activeDisplayBrightness",
         10,
+        non_wifi7_scale=10,
     ),
     _brightness(
         "standby_display_brightness",
         {DeviceKind.THERMOSTAT},
         "standbyDisplayBrightness",
         0,
-        non_wifi7_min_value=1,
+        non_wifi7_scale=10,
+        non_wifi7_min_value=10,
     ),
     _seconds(
         "action_after_error",
@@ -247,6 +255,7 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
         translation_key="size_of_load",
         device_kinds={DeviceKind.THERMOSTAT},
         parameter="sizeOfLoad",
+        non_wifi7_scale=100,
         device_class=NumberDeviceClass.POWER,
         native_min_value=0,
         native_max_value=9900,
@@ -433,10 +442,13 @@ class HeatitWiFiNumber(HeatitWiFiEntity, NumberEntity):
         )
         self._api = api
         self.entity_description = description
-        if description.non_wifi7_min_value is not None and not is_wifi7(
-            coordinator.data or {}
-        ):
-            self._attr_native_min_value = description.non_wifi7_min_value
+        self._scale = description.scale
+        if not is_wifi7(coordinator.data or {}):
+            if description.non_wifi7_scale is not None:
+                self._scale = description.non_wifi7_scale
+                self._attr_native_step = max(description.native_step or 1, self._scale)
+            if description.non_wifi7_min_value is not None:
+                self._attr_native_min_value = description.non_wifi7_min_value
 
     @property
     @override
@@ -445,7 +457,7 @@ class HeatitWiFiNumber(HeatitWiFiEntity, NumberEntity):
         value = _parameter_field(self.entity_description.parameter)(
             self.coordinator.data or {}
         )
-        return None if value is None else value * self.entity_description.scale
+        return None if value is None else value * self._scale
 
     @property
     @override
@@ -466,8 +478,8 @@ class HeatitWiFiNumber(HeatitWiFiEntity, NumberEntity):
         step = description.native_step
         if description.payload_fn is not None:
             payload = description.payload_fn(value)
-        elif description.scale != 1:
-            payload = round(value / description.scale)
+        elif self._scale != 1:
+            payload = round(value / self._scale)
         elif step is not None and step >= 1:
             payload = int(value)
         else:

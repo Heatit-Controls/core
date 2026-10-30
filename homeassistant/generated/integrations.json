@@ -2913,15 +2913,17 @@
     },
     "heatit": {
       "name": "Heatit",
+      "integrations": {
+        "heatit_wifi": {
+          "integration_type": "device",
+          "config_flow": true,
+          "iot_class": "local_polling",
+          "name": "Heatit WiFi"
+        }
+      },
       "iot_standards": [
         "zwave"
       ]
-    },
-    "heatit_wifi": {
-      "name": "Heatit WiFi",
-      "integration_type": "device",
-      "config_flow": true,
-      "iot_class": "local_polling"
     },
     "heatmiser": {
       "name": "Heatmiser",

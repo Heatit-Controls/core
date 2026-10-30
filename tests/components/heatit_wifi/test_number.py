@@ -73,6 +73,20 @@ async def test_entities(
             id="panel_coded_brightness",
         ),
         pytest.param(
+            "wifi6",
+            "number.wifi6_size_of_load",
+            500,
+            {"sizeOfLoad": 5},
+            id="wifi6_coded_load",
+        ),
+        pytest.param(
+            "wifi6",
+            "number.wifi6_power_regulator_active_time",
+            30,
+            {"powerRegulatorActiveTime": 3},
+            id="wifi6_coded_power_regulator",
+        ),
+        pytest.param(
             "thermostat",
             "number.thermostat_eco_setpoint",
             17.5,
@@ -152,7 +166,7 @@ async def test_action_after_error_skips_invalid_range(
     ("device_kind", "entity_id", "expected_min", "expected_max"),
     [
         pytest.param(
-            "wifi6", "number.wifi6_standby_display_brightness", 1, 100, id="wifi6"
+            "wifi6", "number.wifi6_standby_display_brightness", 10, 100, id="wifi6"
         ),
         pytest.param(
             "thermostat",
