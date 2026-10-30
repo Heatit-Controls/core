@@ -147,16 +147,25 @@ class HeatitWiFiAPI:
         _LOGGER.debug("set_parameters(%s) failed: %s", parameters, response)
         return {}
 
-    async def reset_device(self, reset_type: str = "kwh") -> dict[str, Any]:
-        """Send a reset command to the device."""
+    async def reset_device(
+        self, reset_type: str, *, parameter: str = "reset", value: str = "reset"
+    ) -> dict[str, Any]:
+        """Send a reset command to the device.
+
+        The confirmation query parameter guards against accidental resets;
+        its name and value differ per product (see button.py).
+        """
         if reset_type not in ("factory", "settings", "kwh"):
             _LOGGER.error("Unknown reset_type: %s", reset_type)
             return {}
 
-        # Every product's spec marks the "reset=reset" query param as
-        # required, as a guard against accidental resets.
-        endpoint = f"{API_RESET}/{reset_type}?reset=reset"
-        response = await self._request("DELETE", endpoint, timeout=10, retries=1)
+        response = await self._request(
+            "DELETE",
+            f"{API_RESET}/{reset_type}",
+            params={parameter: value},
+            timeout=10,
+            retries=1,
+        )
         if str(response.get("status", "")).lower() == "success":
             _LOGGER.debug("reset_device(%s) succeeded", reset_type)
             return response

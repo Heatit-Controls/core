@@ -31,7 +31,7 @@ def platforms() -> list[Platform]:
 
 
 @pytest.mark.parametrize(
-    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer"]
+    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer", "plug"]
 )
 @pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_entities(
@@ -48,8 +48,8 @@ async def test_entities(
     ("device_kind", "entity_id", "service", "expected_payload", "expected_state"),
     [
         pytest.param(
-            "thermostat",
-            "switch.thermostat_child_lock",
+            "wifi6",
+            "switch.wifi6_child_lock",
             SERVICE_TURN_ON,
             {"disableButtons": 1},
             STATE_ON,
@@ -108,26 +108,31 @@ async def test_turn_on_off(
         (SERVICE_TURN_OFF, {"onOff": False}, STATE_OFF),
     ],
 )
-@pytest.mark.parametrize("device_kind", ["relay"])
+@pytest.mark.parametrize(
+    ("device_kind", "entity_id"),
+    [("relay", "switch.relay"), ("plug", "switch.wall_plug")],
+)
 @pytest.mark.usefixtures("init_integration")
 async def test_relay(
     hass: HomeAssistant,
     aioclient_mock: AiohttpClientMocker,
+    entity_id: str,
     service: str,
     expected_payload: dict[str, Any],
     expected_state: str,
 ) -> None:
-    """In relay mode the device's main entity switches the relay."""
+    """A WiFi7 in relay mode and the Wall Plug switch their relay."""
     await hass.services.async_call(
-        SWITCH_DOMAIN, service, {ATTR_ENTITY_ID: "switch.relay"}, blocking=True
+        SWITCH_DOMAIN, service, {ATTR_ENTITY_ID: entity_id}, blocking=True
     )
 
     assert posted_parameters(aioclient_mock) == [expected_payload]
-    state = hass.states.get("switch.relay")
+    state = hass.states.get(entity_id)
     assert state
     assert state.state == expected_state
 
 
+@pytest.mark.parametrize("device_kind", ["wifi6"])
 @pytest.mark.usefixtures("init_integration")
 async def test_turn_on_failure(
     hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, device_kind: str
@@ -139,10 +144,10 @@ async def test_turn_on_failure(
         await hass.services.async_call(
             SWITCH_DOMAIN,
             SERVICE_TURN_ON,
-            {ATTR_ENTITY_ID: "switch.thermostat_child_lock"},
+            {ATTR_ENTITY_ID: "switch.wifi6_child_lock"},
             blocking=True,
         )
 
-    state = hass.states.get("switch.thermostat_child_lock")
+    state = hass.states.get("switch.wifi6_child_lock")
     assert state
     assert state.state == STATE_OFF

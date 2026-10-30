@@ -19,7 +19,7 @@ def platforms() -> list[Platform]:
 
 
 @pytest.mark.parametrize(
-    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer"]
+    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer", "plug"]
 )
 @pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_entities(

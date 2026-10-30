@@ -28,7 +28,7 @@ def platforms() -> list[Platform]:
 
 
 @pytest.mark.parametrize(
-    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer"]
+    "device_kind", ["thermostat", "relay", "wifi6", "panel", "dimmer", "plug"]
 )
 @pytest.mark.usefixtures("entity_registry_enabled_by_default")
 async def test_entities(
@@ -50,6 +50,27 @@ async def test_entities(
             "floor",
             {"sensorMode": 0},
             id="thermostat_sensor_mode",
+        ),
+        pytest.param(
+            "thermostat",
+            "select.thermostat_sensor_type",
+            "ntc_10k",
+            {"sensorValue": 1},
+            id="wifi7_ntc_order",
+        ),
+        pytest.param(
+            "wifi6",
+            "select.wifi6_sensor_type",
+            "ntc_10k",
+            {"sensorValue": 0},
+            id="wifi6_ntc_order",
+        ),
+        pytest.param(
+            "thermostat",
+            "select.thermostat_buttons",
+            "menu_locked",
+            {"disableButtons": 2},
+            id="wifi7_buttons",
         ),
         pytest.param(
             "panel",

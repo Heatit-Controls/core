@@ -13,6 +13,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
 from .const import DOMAIN, DeviceKind
+from .device import is_wifi7
 from .entity import HeatitWiFiEntity, reports_parameter
 
 # Serialize writes to the single physical device.
@@ -35,6 +36,7 @@ class HeatitWiFiSwitchDescription(SwitchEntityDescription):
     # The device validates parameter types strictly (e.g. disableButtons
     # wants an int, not a bool).
     payload_fn: Callable[[bool], Any] = bool
+    exists_fn: Callable[[dict[str, Any]], bool] = lambda _: True
     entity_category: EntityCategory | None = EntityCategory.CONFIG
     entity_registry_enabled_default: bool = True
 
@@ -61,11 +63,11 @@ def _set_owd_local(status: dict[str, Any], value: Any) -> None:
 
 
 SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
-    # WiFi7 relay mode: the relay itself is the device's main entity.
+    # WiFi7 relay mode and the Wall Plug: the relay is the main entity.
     HeatitWiFiSwitchDescription(
         key="relay",
         name=None,
-        device_kinds={DeviceKind.THERMOSTAT},
+        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PLUG},
         parameter="onOff",
         entity_category=None,
     ),
@@ -76,7 +78,16 @@ SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
         parameter="invertedOutput",
         entity_registry_enabled_default=False,
     ),
-    # Thermostat (WiFi6 / WiFi7)
+    # Wall Plug
+    HeatitWiFiSwitchDescription(
+        key="button_enabled",
+        translation_key="button_enabled",
+        device_kinds={DeviceKind.PLUG},
+        parameter="buttonEnabled",
+        entity_registry_enabled_default=False,
+    ),
+    # Thermostat (WiFi6 / WiFi7). A WiFi7 also has a menu lock, so it gets
+    # the buttons select instead.
     HeatitWiFiSwitchDescription(
         key="child_lock",
         translation_key="child_lock",
@@ -84,6 +95,7 @@ SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
         parameter="disableButtons",
         value_fn=_parameter_field("disableButtons"),
         payload_fn=int,
+        exists_fn=lambda status: not is_wifi7(status),
     ),
     HeatitWiFiSwitchDescription(
         key="open_window_detection",
@@ -120,7 +132,7 @@ SWITCH_DESCRIPTIONS: tuple[HeatitWiFiSwitchDescription, ...] = (
     HeatitWiFiSwitchDescription(
         key="always_on",
         translation_key="always_on",
-        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.DIMMER},
+        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.DIMMER, DeviceKind.PLUG},
         parameter="alwaysOn",
         entity_registry_enabled_default=False,
     ),
@@ -154,6 +166,7 @@ async def async_setup_entry(
         for description in SWITCH_DESCRIPTIONS
         if data.device_kind in description.device_kinds
         and reports_parameter(data, description.status_key or description.parameter)
+        and description.exists_fn(data.coordinator.data)
     )
 
 

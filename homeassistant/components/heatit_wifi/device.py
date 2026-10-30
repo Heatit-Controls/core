@@ -25,8 +25,20 @@ def detect_device_kind(status: dict[str, Any]) -> DeviceKind | None:
     for key, kind in _FINGERPRINT_PARAMETER.items():
         if key in parameters:
             return kind
-    # A WiFi7 in relay mode reports no thermostat parameters at all. Other
-    # products such as the Wall Plug also report onOff, so check the model.
-    if "onOff" in parameters and "WiFi7" in str(status.get("model", "")):
-        return DeviceKind.THERMOSTAT
+    # A WiFi7 in relay mode and the Wall Plug both report only onOff-style
+    # relay parameters, so only the model tells them apart.
+    if "onOff" in parameters:
+        if is_wifi7(status):
+            return DeviceKind.THERMOSTAT
+        if "PLUG" in str(status.get("model", "")).upper():
+            return DeviceKind.PLUG
     return None
+
+
+def is_wifi7(status: dict[str, Any]) -> bool:
+    """Return whether a /api/status payload comes from a WiFi7 thermostat.
+
+    WiFi6 and WiFi7 share most parameters but differ in some value
+    encodings and endpoints; WiFi6 firmware may omit the model entirely.
+    """
+    return "WiFi7" in str(status.get("model", ""))

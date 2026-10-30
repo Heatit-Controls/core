@@ -18,6 +18,7 @@ PANEL_HOST = "http://192.168.1.51"
 DIMMER_HOST = "http://192.168.1.52"
 RELAY_HOST = "http://192.168.1.53"
 WIFI6_HOST = "http://192.168.1.54"
+PLUG_HOST = "http://192.168.1.55"
 
 THERMOSTAT_STATUS: dict[str, Any] = {
     "id": "therm123",
@@ -129,6 +130,8 @@ WIFI6_STATUS: dict[str, Any] = {
         "floorMinimumTemperatureLimit": 5.0,
         "floorMaximumTemperatureLimit": 27.0,
         "temperatureControlHysteresis": 0.5,
+        "sensorValue": 0,
+        "floorCalibration": 0.0,
     },
     "network": {
         "mac": "aa:bb:cc:11:22:55",
@@ -194,12 +197,38 @@ DIMMER_STATUS: dict[str, Any] = {
     },
 }
 
+# Wall Plug, which has no published spec; parameter set from fw 0.1.11.
+PLUG_STATUS: dict[str, Any] = {
+    "id": "plug123",
+    "name": "Wall plug",
+    "model": "WALL PLUG",
+    "firmware": "0.1.11",
+    "state": "Off",
+    "parameters": {
+        "onOff": False,
+        "buttonEnabled": True,
+        "ledBehavior": 0,
+        "deviceRestoreState": 0,
+        "alwaysOn": False,
+        "automaticTurnOn": 0,
+        "automaticTurnOff": 0,
+        "turnOffDelayTime": 0,
+        "actionAfterError": 0,
+    },
+    "network": {
+        "mac": "aa:bb:cc:aa:bb:cc",
+        "ipAddress": "192.168.1.55",
+        "wifiSignalStrength": "-50dBm",
+    },
+}
+
 STATUS_BY_KIND = {
     "thermostat": THERMOSTAT_STATUS,
     "relay": RELAY_STATUS,
     "wifi6": WIFI6_STATUS,
     "panel": PANEL_STATUS,
     "dimmer": DIMMER_STATUS,
+    "plug": PLUG_STATUS,
 }
 HOST_BY_KIND = {
     "thermostat": THERMOSTAT_HOST,
@@ -207,6 +236,7 @@ HOST_BY_KIND = {
     "wifi6": WIFI6_HOST,
     "panel": PANEL_HOST,
     "dimmer": DIMMER_HOST,
+    "plug": PLUG_HOST,
 }
 
 
@@ -259,6 +289,7 @@ NAME_BY_KIND = {
     "wifi6": "WiFi6",
     "panel": "Panel",
     "dimmer": "Dimmer",
+    "plug": "Wall plug",
 }
 # The WiFi7 in relay mode and the WiFi6 are thermostat entries too.
 ENTRY_KIND = {"relay": "thermostat", "wifi6": "thermostat"}
@@ -314,9 +345,16 @@ async def init_integration(
     host = HOST_BY_KIND[device_kind]
     mock_status(aioclient_mock, host, STATUS_BY_KIND[device_kind])
     aioclient_mock.post(f"{host}/api/parameters", json={"status": "success"})
-    for reset_type in ("kwh", "settings", "factory"):
+    for reset_query in (
+        "kwh?reset=reset",
+        "settings?reset=reset",
+        "factory?reset=reset",
+        "kwh?resetKwh=Reset",
+        "settings?resetSettings=Reset",
+        "factory?reset=Reset",
+    ):
         aioclient_mock.delete(
-            f"{host}/api/reset/{reset_type}?reset=reset", json={"status": "success"}
+            f"{host}/api/reset/{reset_query}", json={"status": "success"}
         )
     mock_config_entry.add_to_hass(hass)
     with patch(

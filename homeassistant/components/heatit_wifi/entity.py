@@ -65,9 +65,9 @@ def reports_parameter(data: HeatitWiFiData, parameter: str) -> bool:
 
     A WiFi7 reports a different parameter set in thermostat and relay mode,
     and WiFi6 firmware reports fewer than WiFi7, so thermostat entities
-    follow what the device actually reports. Panel and WM Dimmer have a
-    single fixed set.
+    follow what the device actually reports, as do the Wall Plug's, which
+    have no published spec. Panel and WM Dimmer have a single fixed set.
     """
-    if data.device_kind is not DeviceKind.THERMOSTAT:
+    if data.device_kind not in (DeviceKind.THERMOSTAT, DeviceKind.PLUG):
         return True
     return parameter in (data.coordinator.data.get("parameters") or {})

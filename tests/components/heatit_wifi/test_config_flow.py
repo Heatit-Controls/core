@@ -36,6 +36,7 @@ from tests.test_util.aiohttp import AiohttpClientMocker
         pytest.param(
             "dimmer", STATUS_BY_KIND["dimmer"], "Dimmer living room", id="dimmer"
         ),
+        pytest.param("plug", STATUS_BY_KIND["plug"], "Wall plug", id="wall_plug"),
     ],
 )
 async def test_user_flow_success(
@@ -230,8 +231,8 @@ async def test_user_flow_already_configured(
             {"id": "future123", "parameters": {"somethingNew": 1}}, id="unknown"
         ),
         pytest.param(
-            {"id": "plug123", "model": "WALL PLUG", "parameters": {"onOff": True}},
-            id="wall_plug",
+            {"id": "plug123", "model": "FUTURE", "parameters": {"onOff": True}},
+            id="unknown_relay",
         ),
     ],
 )

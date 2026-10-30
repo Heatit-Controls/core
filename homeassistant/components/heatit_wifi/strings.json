@@ -269,6 +269,9 @@
       "autocalibration": {
         "name": "Autocalibration on repower"
       },
+      "button_enabled": {
+        "name": "Button"
+      },
       "child_lock": {
         "name": "Child lock"
       },

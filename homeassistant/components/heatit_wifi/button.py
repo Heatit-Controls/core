@@ -12,10 +12,20 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import HeatitWiFiConfigEntry, HeatitWiFiCoordinator
 from .api import HeatitWiFiAPI
 from .const import DOMAIN, DeviceKind
+from .device import is_wifi7
 from .entity import HeatitWiFiEntity
 
 # Serialize writes to the single physical device.
 PARALLEL_UPDATES = 1
+
+
+# WiFi7 and the Panel name the confirmation parameter after the reset and
+# expect "Reset"; WiFi6 and the WM Dimmer expect reset=reset for all three.
+_NAMED_RESET_PARAMETERS = {
+    "factory": "reset",
+    "settings": "resetSettings",
+    "kwh": "resetKwh",
+}
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -98,7 +108,17 @@ class HeatitWiFiResetButton(HeatitWiFiEntity, ButtonEntity):
     async def async_press(self) -> None:
         """Send the reset command to the device."""
         reset_type = self.entity_description.reset_type
-        if not await self._api.reset_device(reset_type):
+        if self._device_kind == DeviceKind.PANEL or is_wifi7(
+            self.coordinator.data or {}
+        ):
+            result = await self._api.reset_device(
+                reset_type,
+                parameter=_NAMED_RESET_PARAMETERS[reset_type],
+                value="Reset",
+            )
+        else:
+            result = await self._api.reset_device(reset_type)
+        if not result:
             raise HomeAssistantError(
                 translation_domain=DOMAIN,
                 translation_key="reset_failed",

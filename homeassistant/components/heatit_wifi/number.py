@@ -66,10 +66,12 @@ def _temperature_limit(
     )
 
 
-def _calibration(key: str, parameter: str) -> HeatitWiFiNumberDescription:
+def _calibration(
+    key: str, parameter: str, *, translation_key: str | None = None
+) -> HeatitWiFiNumberDescription:
     return HeatitWiFiNumberDescription(
         key=key,
-        translation_key=key,
+        translation_key=translation_key or key,
         device_kinds={DeviceKind.THERMOSTAT},
         parameter=parameter,
         entity_registry_enabled_default=False,
@@ -100,7 +102,8 @@ def _seconds(key: str, parameter: str, maximum: int) -> HeatitWiFiNumberDescript
     return HeatitWiFiNumberDescription(
         key=key,
         translation_key=key,
-        device_kinds={DeviceKind.THERMOSTAT},
+        # The Wall Plug shares the WiFi7 relay mode's timing parameters.
+        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PLUG},
         parameter=parameter,
         entity_registry_enabled_default=False,
         device_class=NumberDeviceClass.DURATION,
@@ -160,6 +163,23 @@ NUMBER_DESCRIPTIONS: tuple[HeatitWiFiNumberDescription, ...] = (
     _calibration("internal_sensor_calibration", "internalSensorCalibration"),
     _calibration("floor_sensor_calibration", "floorSensorCalibration"),
     _calibration("external_sensor_calibration", "externalSensorCalibration"),
+    # The WiFi6 spec names the calibrations without "Sensor"; only the
+    # names a device actually reports get an entity.
+    _calibration(
+        "internal_calibration",
+        "internalCalibration",
+        translation_key="internal_sensor_calibration",
+    ),
+    _calibration(
+        "floor_calibration",
+        "floorCalibration",
+        translation_key="floor_sensor_calibration",
+    ),
+    _calibration(
+        "external_calibration",
+        "externalCalibration",
+        translation_key="external_sensor_calibration",
+    ),
     HeatitWiFiNumberDescription(
         key="power_regulator_active_time",
         translation_key="power_regulator_active_time",

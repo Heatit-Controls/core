@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
 
-from .conftest import HOST_BY_KIND
+from .conftest import HOST_BY_KIND, NAME_BY_KIND
 
 from tests.common import MockConfigEntry, snapshot_platform
 from tests.test_util.aiohttp import AiohttpClientMocker
@@ -36,21 +36,63 @@ async def test_entities(
 
 
 @pytest.mark.parametrize(
-    ("entity_id", "reset_type"),
+    ("device_kind", "button", "reset_type", "expected_query"),
     [
-        ("button.thermostat_reset_energy_meter", "kwh"),
-        ("button.thermostat_reset_settings_to_defaults", "settings"),
-        ("button.thermostat_factory_reset", "factory"),
+        pytest.param(
+            "thermostat",
+            "reset_energy_meter",
+            "kwh",
+            {"resetKwh": "Reset"},
+            id="wifi7_kwh",
+        ),
+        pytest.param(
+            "thermostat",
+            "reset_settings_to_defaults",
+            "settings",
+            {"resetSettings": "Reset"},
+            id="wifi7_settings",
+        ),
+        pytest.param(
+            "thermostat",
+            "factory_reset",
+            "factory",
+            {"reset": "Reset"},
+            id="wifi7_factory",
+        ),
+        pytest.param(
+            "panel",
+            "reset_settings_to_defaults",
+            "settings",
+            {"resetSettings": "Reset"},
+            id="panel_settings",
+        ),
+        pytest.param(
+            "wifi6",
+            "reset_settings_to_defaults",
+            "settings",
+            {"reset": "reset"},
+            id="wifi6_settings",
+        ),
+        pytest.param(
+            "dimmer",
+            "reset_energy_meter",
+            "kwh",
+            {"reset": "reset"},
+            id="dimmer_kwh",
+        ),
     ],
 )
 @pytest.mark.usefixtures("entity_registry_enabled_by_default", "init_integration")
 async def test_press(
     hass: HomeAssistant,
     aioclient_mock: AiohttpClientMocker,
-    entity_id: str,
+    device_kind: str,
+    button: str,
     reset_type: str,
+    expected_query: dict[str, str],
 ) -> None:
-    """Pressing a button sends the matching reset with its guard parameter."""
+    """Pressing a button sends the product's reset with its guard parameter."""
+    entity_id = f"button.{NAME_BY_KIND[device_kind].lower()}_{button}"
     await hass.services.async_call(
         BUTTON_DOMAIN, SERVICE_PRESS, {ATTR_ENTITY_ID: entity_id}, blocking=True
     )
@@ -62,7 +104,7 @@ async def test_press(
     ]
     assert len(resets) == 1
     assert resets[0].path == f"/api/reset/{reset_type}"
-    assert resets[0].query["reset"] == "reset"
+    assert dict(resets[0].query) == expected_query
 
 
 @pytest.mark.usefixtures("init_integration")
@@ -72,7 +114,7 @@ async def test_press_failure(
     """A rejected reset raises."""
     aioclient_mock.clear_requests()
     aioclient_mock.delete(
-        f"{HOST_BY_KIND[device_kind]}/api/reset/kwh?reset=reset",
+        f"{HOST_BY_KIND[device_kind]}/api/reset/kwh?resetKwh=Reset",
         json={"status": "error"},
     )
 

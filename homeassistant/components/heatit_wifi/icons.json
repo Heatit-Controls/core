@@ -79,6 +79,9 @@
       "autocalibration": {
         "default": "mdi:tune"
       },
+      "button_enabled": {
+        "default": "mdi:gesture-tap-button"
+      },
       "child_lock": {
         "default": "mdi:account-lock"
       },

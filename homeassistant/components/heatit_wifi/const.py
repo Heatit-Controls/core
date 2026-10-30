@@ -39,6 +39,7 @@ class DeviceKind(StrEnum):
     THERMOSTAT = "thermostat"  # WiFi6 and WiFi7
     PANEL = "panel"
     DIMMER = "dimmer"  # WM Dimmer
+    PLUG = "plug"  # Wall Plug
 
 
 # WiFi6 thermostats predate the "model" field; fall back to a plain label
@@ -47,6 +48,7 @@ FALLBACK_MODEL_BY_KIND: Final[dict[str, str]] = {
     DeviceKind.THERMOSTAT: "WiFi6 Thermostat",
     DeviceKind.PANEL: "WiFi Panel",
     DeviceKind.DIMMER: "WM Dimmer",
+    DeviceKind.PLUG: "Wall Plug",
 }
 
 # parameters written as JSON body vs. as query-string args on POST
@@ -78,6 +80,12 @@ PLATFORMS_BY_KIND: Final[dict[DeviceKind, list[Platform]]] = {
     DeviceKind.DIMMER: [
         Platform.BUTTON,
         Platform.LIGHT,
+        Platform.NUMBER,
+        Platform.SELECT,
+        Platform.SENSOR,
+        Platform.SWITCH,
+    ],
+    DeviceKind.PLUG: [
         Platform.NUMBER,
         Platform.SELECT,
         Platform.SENSOR,

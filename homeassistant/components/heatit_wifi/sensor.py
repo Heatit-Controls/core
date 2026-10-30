@@ -81,7 +81,12 @@ SENSOR_DESCRIPTIONS: tuple[HeatitWiFiSensorDescription, ...] = (
     HeatitWiFiSensorDescription(
         key="signal_strength",
         translation_key="signal_strength",
-        device_kinds={DeviceKind.THERMOSTAT, DeviceKind.PANEL, DeviceKind.DIMMER},
+        device_kinds={
+            DeviceKind.THERMOSTAT,
+            DeviceKind.PANEL,
+            DeviceKind.DIMMER,
+            DeviceKind.PLUG,
+        },
         device_class=SensorDeviceClass.SIGNAL_STRENGTH,
         native_unit_of_measurement="dBm",
         entity_category=EntityCategory.DIAGNOSTIC,
