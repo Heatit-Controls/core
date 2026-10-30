@@ -1,0 +1,51 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "cannot_connect": "Could not connect to a Heatit WiFi device at that address.",
+      "different_device": "The address you entered belongs to a different device than the one configured.",
+      "unsupported_device": "This Heatit device is not supported yet. Only the WiFi6 thermostat is supported."
+    },
+    "error": {
+      "cannot_connect": "Could not connect to a Heatit WiFi device at that address.",
+      "unsupported_device": "[%key:component::heatit_wifi::config::abort::unsupported_device%]"
+    },
+    "step": {
+      "discovery_confirm": {
+        "description": "Do you want to add {name}, discovered at {host}?"
+      },
+      "reconfigure": {
+        "data": {
+          "host": "Host"
+        },
+        "data_description": {
+          "host": "[%key:component::heatit_wifi::config::step::user::data_description::host%]"
+        },
+        "description": "Update the address for this device, for example after a DHCP lease change."
+      },
+      "user": {
+        "data": {
+          "host": "Host"
+        },
+        "data_description": {
+          "host": "The device's IP address or hostname on your local network, e.g. 192.168.1.50."
+        },
+        "description": "Enter the local IP address (or hostname) of your Heatit WiFi6 thermostat."
+      }
+    }
+  },
+  "exceptions": {
+    "set_parameter_failed": {
+      "message": "Failed to set {parameter} to {value} on {device}."
+    },
+    "set_temperature_while_off": {
+      "message": "Turn on {device} before changing its target temperature."
+    },
+    "unsupported_value": {
+      "message": "Unsupported {parameter} value: {value}."
+    },
+    "update_failed": {
+      "message": "Failed to fetch data from the Heatit WiFi device at {host}."
+    }
+  }
+}

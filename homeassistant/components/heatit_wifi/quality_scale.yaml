@@ -1,0 +1,121 @@
+rules:
+  # Bronze
+  action-setup:
+    status: exempt
+    comment: no custom service actions registered
+  appropriate-polling: done
+  brands:
+    status: todo
+    comment: needs a home-assistant/brands PR (icon + logo)
+  common-modules: done
+  config-flow-test-coverage: done
+  config-flow: done
+  dependency-transparency:
+    status: todo
+    comment: the API client must move to a PyPI library
+  docs-actions:
+    status: exempt
+    comment: no custom actions
+  docs-conditions:
+    status: exempt
+    comment: no conditions
+  docs-high-level-description:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-installation-instructions:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-removal-instructions:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-triggers:
+    status: exempt
+    comment: no triggers
+  entity-event-setup: done
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure: done
+  test-before-setup: done
+  unique-config-entry: done
+  # Silver
+  action-exceptions: done
+  config-entry-unloading: done
+  docs-configuration-parameters:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-installation-parameters:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  entity-unavailable: done
+  integration-owner: done
+  log-when-unavailable: done
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: the local API has no authentication
+  test-coverage: done
+  # Gold
+  devices: done
+  diagnostics:
+    status: todo
+    comment: follow-up PR
+  discovery:
+    status: done
+    comment: >-
+      zeroconf for WiFi6 V2 (_tf._tcp.local.); WiFi6 V1 doesn't advertise
+      and is kept reachable through DHCP once added manually
+  discovery-update-info: done
+  docs-data-update:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-examples:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-known-limitations:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-supported-devices:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-supported-functions:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-troubleshooting:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  docs-use-cases:
+    status: todo
+    comment: needs a home-assistant.io docs PR
+  dynamic-devices:
+    status: exempt
+    comment: one config entry is exactly one physical device
+  entity-category:
+    status: exempt
+    comment: the only entity is the climate entity
+  entity-device-class:
+    status: exempt
+    comment: the only entity is the climate entity
+  entity-disabled-by-default:
+    status: exempt
+    comment: the only entity is the climate entity
+  entity-translations:
+    status: exempt
+    comment: the only entity takes the device name
+  exception-translations: done
+  icon-translations:
+    status: exempt
+    comment: the climate entity uses its default icons
+  reconfiguration-flow: done
+  repair-issues:
+    status: exempt
+    comment: no repair scenarios in v1
+  stale-devices:
+    status: exempt
+    comment: one config entry is exactly one physical device
+  # Platinum
+  async-dependency:
+    status: todo
+    comment: the API client must move to a PyPI library
+  inject-websession: done
+  strict-typing: done

@@ -281,6 +281,7 @@ homeassistant.components.harman_luxury.*
 homeassistant.components.hase_iq.*
 homeassistant.components.haven_iaq.*
 homeassistant.components.hdfury.*
+homeassistant.components.heatit_wifi.*
 homeassistant.components.helty_cloud.*
 homeassistant.components.heos.*
 homeassistant.components.here_travel_time.*
