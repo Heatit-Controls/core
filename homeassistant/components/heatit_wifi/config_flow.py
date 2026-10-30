@@ -107,9 +107,10 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle a device discovered via mDNS.
 
-        WiFi7, WiFi6 V2, Panel V2 and the WM Dimmer advertise
-        ``_tf._tcp.local.``; the API is probed before showing anything, so
-        other ThermoFloor products sharing that type are dropped silently.
+        WiFi7, WiFi6 V2, Panel V2, the WM Dimmer and current Smart Plug
+        firmware advertise ``_tf._tcp.local.``; the Smart Plug PRS moves to
+        ``_heatit._tcp.local.``. The API is probed before showing anything,
+        so other ThermoFloor products sharing a type are dropped silently.
         WiFi6 V1 and Panel V1 don't advertise at all and stay manual-only.
         """
         host = _normalize_host(str(discovery_info.ip_address))

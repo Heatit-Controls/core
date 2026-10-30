@@ -549,6 +549,11 @@ ZEROCONF = {
             "domain": "homekit_controller",
         },
     ],
+    "_heatit._tcp.local.": [
+        {
+            "domain": "heatit_wifi",
+        },
+    ],
     "_heos-audio._tcp.local.": [
         {
             "domain": "heos",

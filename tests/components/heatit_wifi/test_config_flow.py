@@ -120,6 +120,33 @@ async def test_zeroconf_flow_success(
     assert result["data"]["device_kind"] == "thermostat"
 
 
+async def test_zeroconf_heatit_service(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A Smart Plug announcing the newer _heatit._tcp service is offered too."""
+    mock_status(aioclient_mock, HOST_BY_KIND["plug"], STATUS_BY_KIND["plug"])
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": "zeroconf"},
+        data=ZeroconfServiceInfo(
+            ip_address=ip_address("192.168.1.55"),
+            ip_addresses=[ip_address("192.168.1.55")],
+            hostname="heatit-plug-aabbcc.local.",
+            name="heatit-plug-aabbcc._heatit._tcp.local.",
+            port=80,
+            type="_heatit._tcp.local.",
+            properties={"id": "plug123", "proto": "ws", "path": "/ws"},
+        ),
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "discovery_confirm"
+
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {})
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"]["device_kind"] == "plug"
+
+
 async def test_zeroconf_flow_updates_known_device(
     hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
 ) -> None:
