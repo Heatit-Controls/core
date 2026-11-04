@@ -1,5 +1,6 @@
 {
   "domain": "heatit",
   "name": "Heatit",
+  "integrations": ["heatit_wifi"],
   "iot_standards": ["zwave"]
 }

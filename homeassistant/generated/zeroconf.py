@@ -1097,6 +1097,11 @@ ZEROCONF = {
             "domain": "technove",
         },
     ],
+    "_tf._tcp.local.": [
+        {
+            "domain": "heatit_wifi",
+        },
+    ],
     "_touch-able._tcp.local.": [
         {
             "domain": "apple_tv",

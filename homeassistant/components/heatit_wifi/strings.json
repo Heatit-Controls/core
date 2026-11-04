@@ -1,0 +1,55 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+      "cannot_connect": "Could not connect to a Heatit WiFi device at that address.",
+      "different_device": "The address you entered belongs to a different device than the one configured.",
+      "not_supported": "This Heatit device is not supported by this integration yet."
+    },
+    "error": {
+      "cannot_connect": "Could not connect to a Heatit WiFi device at that address.",
+      "not_supported": "This Heatit device is not supported by this integration yet."
+    },
+    "step": {
+      "discovery_confirm": {
+        "description": "Do you want to add {name}, discovered at {host}?"
+      },
+      "reconfigure": {
+        "data": {
+          "host": "[%key:common::config_flow::data::host%]"
+        },
+        "data_description": {
+          "host": "[%key:component::heatit_wifi::config::step::user::data_description::host%]"
+        },
+        "description": "Update the address for this device, for example after a DHCP lease change."
+      },
+      "user": {
+        "data": {
+          "host": "[%key:common::config_flow::data::host%]"
+        },
+        "data_description": {
+          "host": "The device's IP address or hostname on your local network, e.g. 192.168.1.50."
+        },
+        "description": "Enter the local IP address (or hostname) of your Heatit WiFi thermostat."
+      }
+    }
+  },
+  "entity": {
+    "switch": {
+      "open_window_detection": {
+        "name": "Open window detection"
+      }
+    }
+  },
+  "exceptions": {
+    "cannot_connect": {
+      "message": "Could not connect to the Heatit WiFi device at {host}."
+    },
+    "set_parameter_failed": {
+      "message": "Failed to set {parameter} to {value} on {device}."
+    },
+    "update_failed": {
+      "message": "Failed to fetch data from the Heatit WiFi device."
+    }
+  }
+}

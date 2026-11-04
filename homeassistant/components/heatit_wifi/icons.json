@@ -1,0 +1,9 @@
+{
+  "entity": {
+    "switch": {
+      "open_window_detection": {
+        "default": "mdi:window-open-variant"
+      }
+    }
+  }
+}
