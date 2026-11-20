@@ -8,7 +8,7 @@ from pytest_homeassistant.common import MockConfigEntry
 from pytest_homeassistant.test_util.aiohttp import AiohttpClientMocker
 
 from homeassistant.components.heatit_wifi.const import DOMAIN
-from homeassistant.config_entries import SOURCE_USER, SOURCE_ZEROCONF
+from homeassistant.config_entries import SOURCE_IGNORE, SOURCE_USER, SOURCE_ZEROCONF
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -187,6 +187,27 @@ async def test_zeroconf_flow_updates_known_device(
     assert result["type"] is FlowResultType.ABORT
     assert result["reason"] == "already_configured"
     assert thermostat_config_entry.data[CONF_HOST] == DISCOVERY_URL
+
+
+async def test_zeroconf_flow_ignored_device_not_offered(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """A device the user ignored is not offered again."""
+    MockConfigEntry(
+        domain=DOMAIN,
+        source=SOURCE_IGNORE,
+        unique_id=STATUS_BY_KIND["thermostat"]["id"],
+        data={},
+    ).add_to_hass(hass)
+    mock_status(aioclient_mock, DISCOVERY_URL, STATUS_BY_KIND["thermostat"])
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": SOURCE_ZEROCONF}, data=ZEROCONF_DISCOVERY
+    )
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "already_configured"
+    assert not hass.config_entries.flow.async_progress()
 
 
 async def test_zeroconf_flow_cannot_connect(
