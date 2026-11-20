@@ -102,8 +102,8 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         """Handle a device discovered via mDNS.
 
-        Heatit WiFi devices advertise ``_tf._tcp.local.`` (seen on WiFi7), a type other Thermo-Floor
-        products share, so the API is probed before showing anything.
+        WiFi6 v2 devices advertise ``_tf._tcp.local.`` (v1 does not), a type other
+        Heatit products share, so the API is probed before showing anything.
         """
         host = _normalize_host(str(discovery_info.ip_address))
         try:

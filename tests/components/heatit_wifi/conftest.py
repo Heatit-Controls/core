@@ -129,7 +129,7 @@ def posted_parameters(aioclient_mock: AiohttpClientMocker) -> list[dict[str, Any
 
 @pytest.fixture
 def thermostat_config_entry() -> MockConfigEntry:
-    """Return a config entry for a WiFi7 in thermostat mode."""
+    """Return a config entry for a WiFi6 thermostat."""
     return MockConfigEntry(
         domain=DOMAIN,
         unique_id=THERMOSTAT_STATUS["id"],

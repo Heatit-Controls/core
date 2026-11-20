@@ -38,6 +38,17 @@ ZEROCONF_DISCOVERY = ZeroconfServiceInfo(
 NOT_SUPPORTED_STATUSES = [
     pytest.param(RELAY_STATUS, id="wifi7_relay_mode"),
     pytest.param(
+        {**THERMOSTAT_STATUS, "model": "Heatit WiFi7"}, id="wifi7_thermostat"
+    ),
+    pytest.param(
+        {
+            "id": "panel123",
+            "parameters": {"panelMode": 1},
+            "roomTemperature": 21.0,
+        },
+        id="wifi_panel",
+    ),
+    pytest.param(
         {
             "id": "dimmer123",
             "model": "Heatit WM Dimmer",
