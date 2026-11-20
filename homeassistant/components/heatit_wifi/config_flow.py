@@ -136,32 +136,3 @@ class HeatitWiFiConfigFlow(ConfigFlow, domain=DOMAIN):
                 "host": self._discovered_host,
             },
         )
-
-    async def async_step_reconfigure(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
-        """Let the user change the device's address without re-adding it."""
-        entry = self._get_reconfigure_entry()
-        errors: dict[str, str] = {}
-
-        if user_input is not None:
-            host = _normalize_host(user_input[CONF_HOST])
-            try:
-                result = await self._probe(host)
-            except _ProbeError as err:
-                errors["base"] = err.reason
-            else:
-                # Pointing the entry at another device would orphan its entities.
-                await self.async_set_unique_id(result.device_id)
-                self._abort_if_unique_id_mismatch(reason="different_device")
-                return self.async_update_reload_and_abort(
-                    entry, data_updates={CONF_HOST: host}
-                )
-
-        return self.async_show_form(
-            step_id="reconfigure",
-            data_schema=probatio.Schema(
-                {probatio.Required(CONF_HOST, default=entry.data[CONF_HOST]): cv.string}
-            ),
-            errors=errors,
-        )

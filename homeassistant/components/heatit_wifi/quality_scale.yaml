@@ -93,8 +93,10 @@ rules:
   entity-disabled-by-default: done
   entity-translations: done
   exception-translations: done
-  icon-translations: done
-  reconfiguration-flow: done
+  icon-translations:
+    status: exempt
+    comment: no entity needs a custom icon
+  reconfiguration-flow: todo
   repair-issues:
     status: exempt
     comment: no repair scenarios
