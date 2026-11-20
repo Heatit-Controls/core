@@ -1329,6 +1329,9 @@ hdate[astral]==1.2.2
 # homeassistant.components.hdfury
 hdfury==1.6.1
 
+# homeassistant.components.heatit_wifi
+heatit-wifi==0.1.0
+
 # homeassistant.components.heatmiser
 heatmiserV3==2.0.6
 

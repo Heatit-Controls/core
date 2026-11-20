@@ -5993,6 +5993,17 @@
     },
     "heatit": {
       "name": "Heatit",
+      "integrations": {
+        "heatit_wifi": {
+          "integration_type": "device",
+          "config_flow": true,
+          "iot_class": "local_polling",
+          "categories": [
+            "climate"
+          ],
+          "name": "Heatit WiFi"
+        }
+      },
       "iot_standards": [
         "zwave"
       ]

@@ -339,6 +339,7 @@ FLOWS = {
         "hase_iq",
         "haven_iaq",
         "hdfury",
+        "heatit_wifi",
         "hegel",
         "helty",
         "helty_cloud",
