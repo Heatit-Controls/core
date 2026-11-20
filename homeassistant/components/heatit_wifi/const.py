@@ -7,7 +7,7 @@ from homeassistant.const import Platform
 
 DOMAIN: Final = "heatit_wifi"
 
-PLATFORMS: Final = [Platform.CLIMATE, Platform.SWITCH]
+PLATFORMS: Final = [Platform.CLIMATE]
 
 SCAN_INTERVAL: Final = timedelta(seconds=30)
 

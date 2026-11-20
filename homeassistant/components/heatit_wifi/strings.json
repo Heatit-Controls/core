@@ -34,13 +34,6 @@
       }
     }
   },
-  "entity": {
-    "switch": {
-      "open_window_detection": {
-        "name": "Open window detection"
-      }
-    }
-  },
   "exceptions": {
     "cannot_connect": {
       "message": "Could not connect to the Heatit WiFi device at {host}."

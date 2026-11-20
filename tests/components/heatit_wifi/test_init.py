@@ -14,7 +14,7 @@ from homeassistant.core import HomeAssistant
 
 from .conftest import HOST_BY_KIND, STATUS_BY_KIND, mock_status
 
-OWD_ENTITY = "switch.thermostat_open_window_detection"
+CLIMATE_ENTITY = "climate.thermostat"
 
 
 @pytest.mark.parametrize("device_kind", ["thermostat", "legacy"])
@@ -59,7 +59,7 @@ async def test_unavailable_when_polling_fails(
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
 
-    state = hass.states.get(OWD_ENTITY)
+    state = hass.states.get(CLIMATE_ENTITY)
     assert state
     assert state.state == STATE_UNAVAILABLE
 
@@ -71,9 +71,9 @@ async def test_unavailable_when_polling_fails(
     async_fire_time_changed(hass)
     await hass.async_block_till_done()
 
-    state = hass.states.get(OWD_ENTITY)
+    state = hass.states.get(CLIMATE_ENTITY)
     assert state
-    assert state.state == "off"
+    assert state.state != STATE_UNAVAILABLE
 
 
 @pytest.mark.usefixtures("init_integration")
@@ -85,7 +85,10 @@ async def test_refresh_after_write(
     """A write is read back after a short delay, not immediately."""
     aioclient_mock.mock_calls.clear()
     await hass.services.async_call(
-        "switch", "turn_on", {"entity_id": OWD_ENTITY}, blocking=True
+        "climate",
+        "set_temperature",
+        {"entity_id": CLIMATE_ENTITY, "temperature": 22},
+        blocking=True,
     )
 
     def status_reads() -> int:
